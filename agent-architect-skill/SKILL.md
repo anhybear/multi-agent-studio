@@ -4,8 +4,8 @@ description: >-
   Architectural principles and a build discipline for designing AI agents and
   multi-agent systems WELL — pattern selection, shared state, memory, tools,
   termination, human-in-the-loop, evals, and failure-mode avoidance. Framework
-  agnostic, with concrete mappings to LangGraph, the OpenAI Agents SDK, and
-  Google ADK. Use this skill whenever the user wants to build, design, scaffold,
+  agnostic, with concrete mappings to LangGraph, the OpenAI Agents SDK, Google
+  ADK, and the Claude Agent SDK. Use this skill whenever the user wants to build, design, scaffold,
   refactor, or debug an AI agent, an "agentic" workflow, a multi-agent system, a
   supervisor/orchestrator, a tool-using assistant, or anything where an LLM takes
   actions in a loop — even if they don't say the word "architecture" or name a
@@ -118,9 +118,10 @@ depth):
 ### Step 4 — Implement it in the user's framework
 
 The principles above are framework-agnostic. Map them to whatever the user is on
-— LangGraph, the OpenAI Agents SDK, or Google ADK — using the side-by-side
-primitive tables and idiomatic snippets in **`references/frameworks.md`**. If the
-user hasn't chosen a framework, that reference also has guidance on picking one.
+— LangGraph, the OpenAI Agents SDK, Google ADK, or the Claude Agent SDK — using
+the side-by-side primitive tables and idiomatic snippets in
+**`references/frameworks.md`**. If the user hasn't chosen a framework, that
+reference also has guidance on picking one.
 
 ### Step 5 — Add the guardrails before calling it done
 
@@ -162,6 +163,6 @@ common symptoms to their root cause and fix.
 ## References
 
 - **`references/patterns.md`** — the six orchestration patterns: how each works, trade-offs, when to use, and how to combine them.
-- **`references/frameworks.md`** — concept → primitive mappings and idiomatic snippets for **LangGraph**, **OpenAI Agents SDK**, and **Google ADK**, plus how to choose.
+- **`references/frameworks.md`** — concept → primitive mappings and idiomatic snippets for **LangGraph**, **OpenAI Agents SDK**, **Google ADK**, and the **Claude Agent SDK**, plus how to choose.
 - **`references/memory-and-evals.md`** — designing tools, memory (short/long, app- vs agent-managed, RAG), context engineering, human-in-the-loop, and building a minimal eval.
 - **`references/failure-modes.md`** — ten predictable failure modes, each with symptom → cause → fix, for diagnosing and hardening systems.

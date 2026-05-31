@@ -5,6 +5,7 @@ well, so your coding agent (Claude Code, Codex, OpenCode, …) references solid
 principles whenever it designs or builds an agentic system — on **any** framework
 (LangGraph, OpenAI Agents SDK, Google ADK).
 
+Covers LangGraph, the OpenAI Agents SDK, Google ADK, and the Claude Agent SDK.
 It's just markdown, so it's portable. `SKILL.md` is the entry point; the depth
 lives in `references/`.
 
@@ -13,7 +14,7 @@ agent-architecture/
 ├── SKILL.md                      ← entry: build discipline + when to use
 └── references/
     ├── patterns.md               ← the 6 orchestration patterns
-    ├── frameworks.md             ← LangGraph / OpenAI Agents SDK / Google ADK mappings
+    ├── frameworks.md             ← LangGraph / OpenAI / Google ADK / Claude Agent SDK mappings
     ├── memory-and-evals.md       ← tools, memory, context, human-in-the-loop, evals
     └── failure-modes.md          ← symptom → cause → fix diagnostic
 ```
