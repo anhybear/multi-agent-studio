@@ -4,8 +4,9 @@ An interactive, single-file learning experience for understanding the **architec
 of multi-agent AI systems** — built for non-coders who want to *direct* coding agents
 (Codex, Claude Code, etc.) to build agentic systems well, rather than write the code by hand.
 
-**[→ Open `Multi-Agent-Systems-Academy.html`](Multi-Agent-Systems-Academy.html)** — just
-double-click it. No build step, no dependencies, works offline. Progress saves in your browser.
+**[→ Open the GitHub Pages version](https://anhybear.github.io/multi-agent-studio/)**,
+or open `Multi-Agent-Systems-Academy.html` directly from this repo. No build step,
+no dependencies, works offline. Progress saves in your browser.
 
 ## What's inside
 
