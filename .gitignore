@@ -1,0 +1,12 @@
+# Copyrighted source material — do NOT publish
+*.pdf
+
+# OS / editor / agent cruft
+.DS_Store
+.claude/
+.idea/
+.vscode/
+
+# Temp
+tmp/
+*.log

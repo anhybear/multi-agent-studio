@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Multi-Agent Studio — Learn to Direct AI Teams</title>
+<style>
+:root{
+  --paper:#f7f4ee; --paper2:#fffdf8; --ink:#1c1b29; --ink2:#4a4860; --muted:#7b7990;
+  --line:#e6e0d4; --line2:#d8d2c4;
+  --indigo:#5a3cf0; --indigo-soft:#ece8ff; --indigo-ink:#3a25b8;
+  --teal:#0e8f8a; --teal-soft:#dff4f2;
+  --amber:#c9821a; --amber-soft:#fbeedb;
+  --rose:#c8366b; --rose-soft:#fbe4ec;
+  --green:#2f8f4e; --green-soft:#e2f3e7;
+  --code-bg:#1b1a2b; --code-ink:#e7e4f7;
+  --shadow:0 1px 2px rgba(28,27,41,.06), 0 8px 30px rgba(28,27,41,.06);
+  --shadow-lg:0 20px 60px rgba(28,27,41,.16);
+  --serif:'Iowan Old Style','Palatino Linotype','Palatino',Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Menlo','Cascadia Code','Consolas',monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+a{color:var(--indigo-ink);text-decoration:none}
+::selection{background:#d9cfff}
+
+/* layout */
+#app{display:flex;min-height:100vh}
+#sidebar{width:296px;flex:0 0 296px;background:var(--paper2);border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 18px 40px;z-index:30}
+#main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:820px;padding:0 28px 120px}
+
+/* brand */
+.brand{display:flex;align-items:center;gap:11px;margin:2px 6px 18px;cursor:pointer}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),#8b6dff);
+  flex:0 0 34px;position:relative;box-shadow:0 4px 14px rgba(90,60,240,.4)}
+.brand .mark::before,.brand .mark::after{content:"";position:absolute;border-radius:50%;background:#fff}
+.brand .mark::before{width:7px;height:7px;top:8px;left:8px;box-shadow:12px 0 #fff,0 12px #fff,12px 12px #fff}
+.brand .mark::after{width:18px;height:18px;border:1.6px solid rgba(255,255,255,.55);background:transparent;border-radius:5px;top:8px;left:8px}
+.brand h1{font-family:var(--serif);font-size:18px;margin:0;line-height:1.15;font-weight:700;letter-spacing:-.2px}
+.brand p{margin:0;font-size:11px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+
+/* progress meter */
+.meter{margin:0 6px 16px;font-size:12px;color:var(--muted)}
+.meter .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.meter .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--indigo),#9a7dff);width:0;transition:width .5s}
+
+/* nav */
+.nav-part{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);
+  margin:18px 8px 7px;display:flex;align-items:center;gap:8px}
+.nav-part span{flex:1;height:1px;background:var(--line)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;
+  color:var(--ink2);font-size:14.5px;line-height:1.3;transition:background .15s,color .15s;margin:1px 0}
+.nav-item:hover{background:var(--indigo-soft);color:var(--ink)}
+.nav-item.active{background:var(--indigo);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(90,60,240,.32)}
+.nav-item.active .dot{border-color:#fff}
+.nav-item .dot{width:16px;height:16px;flex:0 0 16px;border-radius:50%;border:2px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-size:10px;transition:.15s}
+.nav-item .dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.nav-item.active .dot.done{background:#fff;color:var(--green);border-color:#fff}
+.nav-num{font-size:11px;color:var(--muted);width:14px;text-align:center}
+.nav-item.active .nav-num{color:rgba(255,255,255,.8)}
+
+.sidebar-foot{margin:22px 8px 0;font-size:11.5px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
+.sidebar-foot b{color:var(--ink2)}
+
+/* mobile */
+#menuBtn{display:none;position:fixed;top:14px;left:14px;z-index:50;background:var(--ink);color:#fff;border:none;
+  width:44px;height:44px;border-radius:12px;font-size:20px;cursor:pointer;box-shadow:var(--shadow-lg)}
+#scrim{display:none;position:fixed;inset:0;background:rgba(20,18,30,.45);z-index:25}
+
+/* hero / home */
+.hero{padding:64px 0 30px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--indigo-ink);background:var(--indigo-soft);padding:6px 13px;border-radius:99px;margin-bottom:22px}
+.hero h1{font-family:var(--serif);font-size:54px;line-height:1.04;margin:0 0 18px;letter-spacing:-1.2px;font-weight:800}
+.hero h1 em{font-style:italic;color:var(--indigo)}
+.hero .lede{font-size:21px;color:var(--ink2);line-height:1.5;max-width:640px;margin:0 0 14px}
+.hero .sub{font-size:16px;color:var(--muted);max-width:620px}
+
+h2.sec{font-family:var(--serif);font-size:30px;letter-spacing:-.5px;margin:46px 0 8px;font-weight:700}
+h3.sub{font-size:13px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:34px 0 12px}
+p{margin:0 0 16px}
+.lesson-body p,.lesson-body li{font-size:17px}
+.lesson-body strong{color:var(--ink)}
+.lesson-body ul{margin:0 0 16px;padding-left:22px}
+.lesson-body li{margin:0 0 7px}
+
+/* lesson header */
+.lhead{padding:44px 0 8px;border-bottom:1px solid var(--line);margin-bottom:30px}
+.lhead .crumb{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--indigo);margin-bottom:12px;display:flex;gap:10px;align-items:center}
+.lhead .crumb .chip{background:var(--indigo-soft);padding:3px 9px;border-radius:6px;color:var(--indigo-ink)}
+.lhead h1{font-family:var(--serif);font-size:42px;line-height:1.08;margin:0 0 12px;letter-spacing:-.8px;font-weight:800}
+.lhead .tag{font-size:15px;color:var(--ink2);max-width:620px}
+.lhead .time{font-size:13px;color:var(--muted);margin-top:14px}
+
+/* cards / callouts */
+.card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:22px 0;box-shadow:var(--shadow)}
+.callout{border-radius:14px;padding:18px 20px 18px 22px;margin:22px 0;position:relative;border:1px solid var(--line);background:var(--paper2)}
+.callout .ctitle{font-weight:700;font-size:13px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.callout p:last-child{margin-bottom:0}
+.callout.analogy{background:var(--amber-soft);border-color:#f0dcc0}
+.callout.analogy .ctitle{color:var(--amber)}
+.callout.key{background:var(--indigo-soft);border-color:#ddd5ff}
+.callout.key .ctitle{color:var(--indigo-ink)}
+.callout.warn{background:var(--rose-soft);border-color:#f3cdda}
+.callout.warn .ctitle{color:var(--rose)}
+.callout.tip{background:var(--teal-soft);border-color:#c4e7e4}
+.callout.tip .ctitle{color:var(--teal)}
+
+/* concept grid */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.cgrid .ccard{background:var(--paper2);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+.cgrid .ccard h4{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
+.cgrid .ccard p{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.5}
+.cgrid .ccard .ic{width:26px;height:26px;border-radius:7px;background:var(--indigo-soft);color:var(--indigo-ink);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 26px}
+
+/* langgraph panel */
+.lg{border:1px solid #cdbfff;border-radius:16px;margin:26px 0;overflow:hidden;background:var(--paper2)}
+.lg .lg-head{background:linear-gradient(135deg,#efeaff,#f6f3ff);padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #ddd5ff}
+.lg .lg-head .lg-logo{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--indigo-ink);background:#fff;border:1px solid #d6ccff;padding:3px 9px;border-radius:6px}
+.lg .lg-head .lg-t{font-weight:700;font-size:14.5px}
+.lg .lg-body{padding:18px 20px}
+.lg .lg-body p{font-size:15px;color:var(--ink2)}
+.maprow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.maprow:last-child{border-bottom:none}
+.maprow .b{font-weight:600;color:var(--ink);flex:0 0 44%}
+.maprow .arrow{color:var(--indigo);font-weight:700}
+.maprow .l{font-family:var(--mono);font-size:13px;color:var(--indigo-ink);background:var(--indigo-soft);padding:2px 8px;border-radius:6px}
+
+/* code */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.6;margin:16px 0}
+pre .c{color:#8a86b8}/* comment */
+pre .k{color:#c792ea}/* keyword */
+pre .s{color:#c3e88d}/* string */
+pre .f{color:#82aaff}/* func */
+code.inl{font-family:var(--mono);font-size:.9em;background:#efeaff;color:var(--indigo-ink);padding:1px 6px;border-radius:5px}
+
+/* go deeper */
+.deeper{border:1px solid var(--line);border-radius:12px;margin:18px 0;overflow:hidden;background:var(--paper2)}
+.deeper summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;list-style:none;display:flex;align-items:center;gap:9px;color:var(--ink2)}
+.deeper summary::-webkit-details-marker{display:none}
+.deeper summary .tw{transition:transform .2s;color:var(--indigo)}
+.deeper[open] summary .tw{transform:rotate(90deg)}
+.deeper summary:hover{background:var(--paper)}
+.deeper .dbody{padding:4px 20px 18px;border-top:1px solid var(--line)}
+.deeper .dbody p{font-size:14.5px;color:var(--ink2)}
+
+/* director prompt */
+.director{background:linear-gradient(135deg,#1b1a2b,#252339);color:#ece9fb;border-radius:16px;padding:22px 24px;margin:26px 0;box-shadow:var(--shadow-lg)}
+.director .dh{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:#b9acff;margin-bottom:6px}
+.director h4{margin:0 0 12px;font-family:var(--serif);font-size:21px;color:#fff;font-weight:700}
+.director p{color:#c9c4e8;font-size:14.5px}
+.director .promptbox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:11px;
+  padding:15px 17px;font-family:var(--mono);font-size:12.8px;line-height:1.6;color:#e3dffb;white-space:pre-wrap;position:relative}
+.director .copy{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.12);border:none;color:#cfc8f5;
+  font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:var(--sans);font-weight:600}
+.director .copy:hover{background:rgba(255,255,255,.22)}
+
+/* quiz */
+.quiz{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:26px 0;box-shadow:var(--shadow)}
+.quiz .qh{font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.quiz .q{font-size:18px;font-weight:600;margin-bottom:14px;font-family:var(--serif)}
+.quiz .opt{display:block;width:100%;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:11px;
+  padding:12px 15px;margin:8px 0;cursor:pointer;font-size:15px;color:var(--ink);transition:.15s;font-family:inherit}
+.quiz .opt:hover{border-color:var(--indigo);background:var(--indigo-soft)}
+.quiz .opt.correct{border-color:var(--green);background:var(--green-soft);font-weight:600}
+.quiz .opt.wrong{border-color:var(--rose);background:var(--rose-soft)}
+.quiz .opt:disabled{cursor:default}
+.quiz .fb{margin-top:12px;font-size:14.5px;padding:12px 15px;border-radius:10px;display:none}
+.quiz .fb.show{display:block}
+.quiz .fb.ok{background:var(--green-soft);color:#1f6b38}
+.quiz .fb.no{background:var(--rose-soft);color:#9e2850}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--indigo);color:#fff;border:none;border-radius:11px;
+  padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;box-shadow:0 6px 18px rgba(90,60,240,.3)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(90,60,240,.4)}
+.btn.ghost{background:transparent;color:var(--indigo-ink);box-shadow:none;border:1.5px solid var(--line2)}
+.btn.ghost:hover{background:var(--indigo-soft);transform:none;box-shadow:none}
+.btn.sm{padding:8px 15px;font-size:13.5px}
+.btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+
+/* footer nav */
+.lnav{display:flex;justify-content:space-between;gap:14px;margin:50px 0 0;border-top:1px solid var(--line);padding-top:26px;align-items:center}
+.lnav .l-prev,.lnav .l-next{display:flex;flex-direction:column;cursor:pointer;padding:14px 18px;border-radius:13px;border:1px solid var(--line);background:var(--paper2);transition:.15s;max-width:46%}
+.lnav .l-prev:hover,.lnav .l-next:hover{border-color:var(--indigo);background:var(--indigo-soft)}
+.lnav .l-next{text-align:right;align-items:flex-end}
+.lnav small{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700}
+.lnav b{font-size:15px;color:var(--ink);font-weight:600}
+.complete-btn{margin:30px auto 0;display:flex;justify-content:center}
+
+/* widgets — generic */
+.widget{border:1px solid var(--line2);border-radius:18px;margin:28px 0;background:linear-gradient(180deg,#fffdf8,#f8f5ef);box-shadow:var(--shadow);overflow:hidden}
+.widget .wbar{padding:13px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:var(--paper2)}
+.widget .wbar .wd{width:9px;height:9px;border-radius:50%;background:var(--indigo);box-shadow:0 0 0 4px var(--indigo-soft)}
+.widget .wbar .wt{font-weight:700;font-size:13px;letter-spacing:.4px}
+.widget .wbar .wsub{font-size:12px;color:var(--muted);margin-left:auto}
+.widget .wbody{padding:22px}
+
+/* agent loop widget */
+.loopwrap{display:flex;flex-direction:column;align-items:center;gap:18px}
+.loopstage{position:relative;width:280px;height:280px}
+.loopnode{position:absolute;width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;border:2px solid var(--line2);background:#fff;
+  font-size:13px;font-weight:600;transition:.35s;color:var(--ink2)}
+.loopnode .ei{font-size:22px;margin-bottom:2px}
+.loopnode.on{border-color:var(--indigo);background:var(--indigo);color:#fff;transform:scale(1.08);box-shadow:0 12px 30px rgba(90,60,240,.4)}
+.loopnode.on .small{color:#d8d0ff}
+.loopnode .small{font-size:10px;font-weight:500;color:var(--muted)}
+.loop-say{min-height:54px;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+  font-size:14.5px;color:var(--ink2);width:100%;max-width:420px;text-align:center;transition:.2s}
+.loop-say b{color:var(--indigo-ink)}
+
+/* decision tree */
+.dt-q{font-family:var(--serif);font-size:21px;font-weight:700;margin-bottom:16px;line-height:1.3}
+.dt-opts{display:flex;flex-direction:column;gap:10px}
+.dt-opt{text-align:left;background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:13px 16px;cursor:pointer;
+  font-size:15px;font-family:inherit;transition:.15s;color:var(--ink)}
+.dt-opt:hover{border-color:var(--indigo);background:var(--indigo-soft)}
+.dt-result{text-align:center;padding:10px 0}
+.dt-result .badge{display:inline-block;padding:8px 18px;border-radius:99px;font-weight:700;font-size:14px;letter-spacing:.4px;margin-bottom:14px}
+.dt-result h3{font-family:var(--serif);font-size:26px;margin:0 0 10px}
+.dt-result p{font-size:15px;color:var(--ink2);max-width:480px;margin:0 auto 8px}
+.dt-path{font-size:12.5px;color:var(--muted);margin-top:14px;font-style:italic}
+
+/* pattern gallery */
+.pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pcard{border:1.5px solid var(--line2);border-radius:14px;padding:14px;cursor:pointer;background:#fff;transition:.15s;text-align:center}
+.pcard:hover{border-color:var(--indigo);transform:translateY(-2px);box-shadow:var(--shadow)}
+.pcard.sel{border-color:var(--indigo);background:var(--indigo-soft)}
+.pcard svg{width:100%;height:78px;margin-bottom:8px}
+.pcard .pn{font-weight:700;font-size:14px;margin-bottom:2px}
+.pcard .pk{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.pdetail{margin-top:16px;border-top:1px solid var(--line);padding-top:16px;display:none}
+.pdetail.show{display:block}
+.pdetail h4{font-family:var(--serif);font-size:20px;margin:0 0 4px}
+.ptag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-bottom:10px;letter-spacing:.4px}
+.pmeta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.pmeta span{font-size:12px;background:var(--paper);border:1px solid var(--line);padding:4px 10px;border-radius:7px;color:var(--ink2)}
+.pmeta span b{color:var(--ink)}
+
+/* risk classifier */
+.rc-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;justify-content:center}
+.rc-chip{padding:8px 14px;border-radius:10px;border:1.5px solid var(--line2);background:#fff;font-size:13.5px;cursor:pointer;transition:.15s;font-weight:500}
+.rc-chip:hover{border-color:var(--indigo)}
+.rc-chip.placed{opacity:.35;pointer-events:none;text-decoration:line-through}
+.rc-bins{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc-bin{border:2px dashed var(--line2);border-radius:14px;padding:14px;min-height:120px}
+.rc-bin.low{border-color:#9bd3ab;background:var(--green-soft)}
+.rc-bin.high{border-color:#eaa9c1;background:var(--rose-soft)}
+.rc-bin h4{margin:0 0 4px;font-size:15px}
+.rc-bin .hint{font-size:12px;color:var(--ink2);margin-bottom:10px}
+.rc-bin .drop{display:flex;flex-wrap:wrap;gap:6px}
+.rc-bin .drop .pl{font-size:12.5px;padding:5px 10px;border-radius:8px;background:#fff;border:1px solid var(--line)}
+.rc-bin .drop .pl.ok{border-color:var(--green)}
+.rc-bin .drop .pl.bad{border-color:var(--rose);text-decoration:line-through;opacity:.7}
+.rc-active{outline:3px solid var(--indigo);outline-offset:2px;border-radius:10px}
+
+/* graph tracer */
+.gt-wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.gt-canvas{position:relative;background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:8px;min-height:340px}
+.gt-state{background:var(--code-bg);color:var(--code-ink);border-radius:14px;padding:16px;font-family:var(--mono);font-size:12.5px;line-height:1.7}
+.gt-state .sk{color:#82aaff}.gt-state .sv{color:#c3e88d}.gt-state .upd{background:rgba(195,232,141,.18);border-radius:3px;animation:flash 1s}
+@keyframes flash{0%{background:rgba(195,232,141,.6)}100%{background:rgba(195,232,141,.18)}}
+.gt-node{position:absolute;border:2px solid var(--line2);background:#fff;border-radius:11px;padding:9px 12px;font-size:12.5px;
+  font-weight:600;text-align:center;transition:.3s;min-width:96px;color:var(--ink2)}
+.gt-node.on{border-color:var(--indigo);background:var(--indigo);color:#fff;box-shadow:0 10px 24px rgba(90,60,240,.4);transform:scale(1.05)}
+.gt-node.done{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+.gt-node .nt{font-size:10px;font-weight:500;opacity:.7;text-transform:uppercase;letter-spacing:.4px}
+.gt-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.gt-controls{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.gt-log{font-size:13px;color:var(--ink2);margin-top:10px;min-height:20px}
+
+/* orchestration sim */
+.os-top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.os-pat{padding:7px 13px;border-radius:9px;border:1.5px solid var(--line2);background:#fff;font-size:13px;cursor:pointer;font-weight:600;transition:.15s}
+.os-pat.sel{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.os-agents{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:6px 0 16px}
+.os-agent{width:120px;border:2px solid var(--line2);border-radius:13px;padding:12px 8px;text-align:center;background:#fff;transition:.3s;position:relative}
+.os-agent.active{border-color:var(--indigo);box-shadow:0 10px 26px rgba(90,60,240,.35);transform:translateY(-3px)}
+.os-agent.active::after{content:"speaking";position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+  background:var(--indigo);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.4px}
+.os-agent .av{width:40px;height:40px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:19px}
+.os-agent .an{font-size:13px;font-weight:700}
+.os-agent .ar{font-size:10.5px;color:var(--muted)}
+.os-feed{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:12px;max-height:230px;overflow-y:auto;font-size:13.5px}
+.os-msg{padding:8px 12px;border-radius:10px;margin:6px 0;background:#fff;border:1px solid var(--line);animation:slidein .3s}
+@keyframes slidein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.os-msg .who{font-weight:700;font-size:12px;margin-bottom:1px}
+.os-msg.sys{background:var(--indigo-soft);border-color:#d6ccff;font-style:italic;color:var(--indigo-ink)}
+.os-msg.term{background:var(--green-soft);border-color:#9bd3ab;color:#1f6b38;font-weight:600;font-style:normal}
+
+/* failure diagnostic */
+.fd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.fd-sym{text-align:left;background:#fff;border:1.5px solid var(--line2);border-radius:12px;padding:13px 15px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;color:var(--ink)}
+.fd-sym:hover{border-color:var(--rose);background:var(--rose-soft)}
+.fd-sym.sel{border-color:var(--rose);background:var(--rose-soft);font-weight:600}
+.fd-ans{margin-top:16px;border-top:1px solid var(--line);padding-top:16px;display:none}
+.fd-ans.show{display:block}
+.fd-ans .fdname{font-family:var(--serif);font-size:21px;font-weight:700;margin-bottom:4px;color:var(--rose)}
+
+/* glossary */
+.gloss-search{width:100%;padding:13px 16px;border:1.5px solid var(--line2);border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:18px}
+.gloss-search:focus{outline:none;border-color:var(--indigo)}
+.gterm{border-bottom:1px solid var(--line);padding:14px 4px}
+.gterm dt{font-weight:700;font-size:16px;font-family:var(--serif);margin-bottom:3px}
+.gterm dd{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.55}
+.gterm .lgtag{font-family:var(--mono);font-size:11.5px;color:var(--indigo-ink);background:var(--indigo-soft);padding:1px 7px;border-radius:5px;margin-left:6px}
+
+/* home cards */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:26px 0}
+.home-card{border:1px solid var(--line);border-radius:15px;padding:20px;background:var(--paper2);cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.home-card:hover{border-color:var(--indigo);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.home-card .hc-n{font-size:12px;font-weight:700;color:var(--indigo);letter-spacing:.6px}
+.home-card h3{font-family:var(--serif);font-size:20px;margin:6px 0 6px}
+.home-card p{font-size:14px;color:var(--ink2);margin:0}
+.home-feat{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 6px}
+.feat{flex:1;min-width:150px;background:var(--paper2);border:1px solid var(--line);border-radius:13px;padding:15px 16px}
+.feat .fi{font-size:20px;margin-bottom:6px}
+.feat b{display:block;font-size:14.5px;margin-bottom:3px}
+.feat span{font-size:13px;color:var(--ink2)}
+
+.tablewrap{overflow-x:auto;margin:20px 0}
+table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px}
+table.cmp th,table.cmp td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+table.cmp th{background:var(--paper2);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+table.cmp td b{color:var(--ink)}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.pill.lo{background:var(--green-soft);color:#1f6b38}
+.pill.md{background:var(--amber-soft);color:#9a6212}
+.pill.hi{background:var(--rose-soft);color:#9e2850}
+
+@media(max-width:900px){
+  #sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .25s;box-shadow:var(--shadow-lg)}
+  #sidebar.open{transform:none}
+  #menuBtn{display:block}
+  #scrim.open{display:block}
+  .wrap{padding:0 18px 100px}
+  .hero{padding:74px 0 20px}
+  .hero h1{font-size:38px}
+  .lhead h1{font-size:32px}
+  .cgrid,.home-grid,.gt-wrap,.rc-bins{grid-template-columns:1fr}
+  .pgrid{grid-template-columns:1fr 1fr}
+  .fd-grid{grid-template-columns:1fr}
+  .maprow{flex-wrap:wrap}.maprow .b{flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<button id="menuBtn" onclick="toggleNav()">☰</button>
+<div id="scrim" onclick="toggleNav()"></div>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand" onclick="go('home')">
+      <div class="mark"></div>
+      <div><h1>The Multi-Agent Studio</h1><p>Learn to direct AI teams</p></div>
+    </div>
+    <div class="meter">
+      <span id="meterTxt">0 of 10 lessons complete</span>
+      <div class="bar"><i id="meterBar"></i></div>
+    </div>
+    <nav id="navList"></nav>
+    <div class="sidebar-foot">
+      Built from <b>Victor Dibia's “Designing Multi-Agent Systems”</b> (2025), classic design patterns, and current <b>LangGraph</b>. Made for directing Codex &amp; Claude Code — not for memorising code.
+    </div>
+  </aside>
+  <main id="main"><div class="wrap" id="content"></div></main>
+</div>
+
+<script>
+/* ============================================================ DATA */
+const PARTS = [
+  {id:'I', name:'Part I · Foundations'},
+  {id:'II', name:'Part II · Building'},
+  {id:'III', name:'Part III · Making it work'},
+  {id:'IV', name:'Part IV · The frontier'},
+];
+
+/* Lessons: each has render() returning HTML string; widgets mounted after via mount(). */
+const LESSONS = [
+  /* 1 */ {id:'agent', part:'I', chip:'Lesson 1', title:'Meet the Agent', time:'8 min · the atom of everything',
+    tag:'Before “multi-agent” means anything, you need a crisp picture of a single agent — and why it is not the same thing as “an AI model.”'},
+  /* 2 */ {id:'oneormany', part:'I', chip:'Lesson 2', title:'One Agent, or a Whole Team?', time:'9 min · choosing your architecture',
+    tag:'When does a task actually need multiple agents? You will leave with a decision framework you can run in your head before briefing any coder.'},
+  /* 3 */ {id:'patterns', part:'I', chip:'Lesson 3 · core', title:'The Six Ways Agents Work Together', time:'14 min · the heart of the craft',
+    tag:'Every multi-agent system you will ever build is one of six orchestration patterns — or a blend. Learn to see them and pick the right one.'},
+  /* 4 */ {id:'ux', part:'I', chip:'Lesson 4', title:'Designing for the Human in the Loop', time:'8 min · trust, cost & control',
+    tag:'Autonomous systems are unpredictable by nature. Four UX principles keep them trustworthy — and shape what you ask your coder to build around the agents.'},
+  /* 5 */ {id:'insideagent', part:'II', chip:'Lesson 5', title:'Inside a Single Agent', time:'11 min · the moving parts',
+    tag:'Tools, memory, the execution loop, guardrails, context. The parts you will name when you tell a coder exactly what each agent should be made of.'},
+  /* 6 */ {id:'graphs', part:'II', chip:'Lesson 6 · LangGraph', title:'Workflows as Graphs → LangGraph', time:'15 min · the big translation',
+    tag:'This is where the book and LangGraph become the same idea. Nodes, edges, shared state, checkpoints — explained, then mapped one-to-one onto real LangGraph code.'},
+  /* 7 */ {id:'orchestration', part:'II', chip:'Lesson 7', title:'Autonomous Orchestration', time:'12 min · let the AI drive',
+    tag:'When control flow is decided at runtime by an AI, not by you. Watch round-robin, AI-driven and plan-based orchestration run, step by step.'},
+  /* 8 */ {id:'frameworks', part:'II', chip:'Lesson 8 · LangGraph', title:'Why a Framework — and LangGraph in Full', time:'12 min · read any LangGraph repo',
+    tag:'The ten things a framework gives you, and the complete LangGraph vocabulary — so you can read a LangGraph codebase and know what every piece is doing.'},
+  /* 9 */ {id:'failure', part:'III', chip:'Lesson 9', title:'Why Systems Fail (and How to Direct Around It)', time:'13 min · the director’s edge',
+    tag:'Ten predictable failure modes from someone who shipped these for years — turned into a diagnostic and a set of briefs you can hand straight to a coding agent.'},
+  /* 10 */ {id:'frontier', part:'IV', chip:'Lesson 10', title:'Protocols, Ethics & Real Builds', time:'10 min · the wider world',
+    tag:'How agents talk across the internet (MCP & A2A), what responsible deployment means when agents can act, and two complete real-world systems.'},
+  /* extras */
+  {id:'playbook', part:'IV', chip:'Reference', title:'The Director’s Playbook', time:'cheat sheet',
+    tag:'Every “direct your coder” brief from the course, collected in one place. Your launchpad for briefing Codex or Claude Code.'},
+  {id:'glossary', part:'IV', chip:'Reference', title:'Glossary', time:'searchable',
+    tag:'Plain-language definitions of every term, each tagged with its LangGraph equivalent.'},
+];
+
+/* ============================================================ STATE */
+const store = {
+  get done(){ try{return JSON.parse(localStorage.getItem('mas_done')||'[]')}catch(e){return[]} },
+  set done(v){ localStorage.setItem('mas_done', JSON.stringify(v)) },
+  complete(id){ const d=this.done; if(!d.includes(id)){d.push(id); this.done=d;} },
+  isDone(id){ return this.done.includes(id) }
+};
+const COUNTABLE = LESSONS.filter(l=>!['playbook','glossary'].includes(l.id)).map(l=>l.id);
+
+/* ============================================================ NAV */
+function buildNav(){
+  const nav = document.getElementById('navList');
+  let html='';
+  PARTS.forEach(p=>{
+    html += '<div class="nav-part">'+p.name+'<span></span></div>';
+    LESSONS.filter(l=>l.part===p.id).forEach((l)=>{
+      const idx = LESSONS.indexOf(l);
+      const num = COUNTABLE.includes(l.id)? (COUNTABLE.indexOf(l.id)+1) : '·';
+      html += '<div class="nav-item" data-id="'+l.id+'" onclick="go(\''+l.id+'\')">'
+        + '<span class="dot" data-dot="'+l.id+'"></span>'
+        + '<span class="nav-num">'+num+'</span>'
+        + '<span>'+l.title+'</span></div>';
+    });
+  });
+  nav.innerHTML = html;
+}
+function refreshNav(activeId){
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.dataset.id===activeId);
+  });
+  LESSONS.forEach(l=>{
+    const dot = document.querySelector('[data-dot="'+l.id+'"]');
+    if(!dot) return;
+    if(store.isDone(l.id)){ dot.classList.add('done'); dot.innerHTML='✓'; }
+    else { dot.classList.remove('done'); dot.innerHTML=''; }
+  });
+  const n = store.done.filter(id=>COUNTABLE.includes(id)).length;
+  document.getElementById('meterTxt').textContent = n+' of '+COUNTABLE.length+' lessons complete';
+  document.getElementById('meterBar').style.width = (n/COUNTABLE.length*100)+'%';
+}
+
+/* ============================================================ ROUTER */
+function go(id){
+  if(id==='home'){ renderHome(); refreshNav('home'); }
+  else { const l = LESSONS.find(x=>x.id===id); if(!l) return; renderLesson(l); refreshNav(id); }
+  window.scrollTo(0,0);
+  if(window.innerWidth<=900) closeNav();
+  location.hash = id;
+}
+window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(h && h!==current) go(h); });
+let current='home';
+
+/* ============================================================ HOME */
+function renderHome(){
+  current='home';
+  const c = document.getElementById('content');
+  let cards='';
+  COUNTABLE.forEach((id,i)=>{
+    const l=LESSONS.find(x=>x.id===id);
+    cards += '<div class="home-card" onclick="go(\''+id+'\')">'
+      +'<div class="hc-n">'+(store.isDone(id)?'✓ COMPLETE · ':'')+'LESSON '+(i+1)+'</div>'
+      +'<h3>'+l.title+'</h3><p>'+l.tag+'</p></div>';
+  });
+  c.innerHTML = `
+  <div class="hero">
+    <div class="eyebrow">🎬 An interactive studio for non-coders</div>
+    <h1>Stop being the bottleneck. Learn to <em>direct</em> AI teams.</h1>
+    <p class="lede">You don't need to write the code. You need to understand the <strong>architecture</strong> well enough to tell Codex or Claude Code exactly what to build — and to know when it's building the wrong thing.</p>
+    <p class="sub">A hands-on translation of Victor Dibia's <em>Designing Multi-Agent Systems</em> and the LangGraph framework, made for a creative mind. Plain language first, real technical depth on demand, with diagrams you can poke, systems you can run, and briefs you can copy.</p>
+    <div style="margin-top:26px"><button class="btn" onclick="go('agent')">Start the journey →</button>
+    <button class="btn ghost" style="margin-left:10px" onclick="go('patterns')">Jump to the core lesson</button></div>
+  </div>
+
+  <div class="home-feat">
+    <div class="feat"><div class="fi">🧩</div><b>See it</b><span>Click-through diagrams of every orchestration pattern.</span></div>
+    <div class="feat"><div class="fi">▶️</div><b>Run it</b><span>Watch agent teams "think" step by step — no code, no API key.</span></div>
+    <div class="feat"><div class="fi">🎯</div><b>Direct it</b><span>Copy-ready briefs for your coding agent in every lesson.</span></div>
+  </div>
+
+  <h2 class="sec">The journey</h2>
+  <p style="color:var(--ink2)">Ten lessons across four parts — from "what is an agent" all the way to running, debugging and shipping real systems. Take them in order, or wander.</p>
+  <div class="home-grid">${cards}</div>
+
+  <div class="callout tip" style="margin-top:30px">
+    <div class="ctitle">🧭 How to use this</div>
+    <p>Read the plain-language part. Poke the interactive bits. Open <b>“Go deeper”</b> only when you're curious about the real mechanics. End each lesson by reading the <b>director's brief</b> — that's the bit that makes you better at telling an AI what to build. Your progress saves automatically in this browser.</p>
+  </div>`;
+}
+
+/* ============================================================ LESSON SHELL */
+function renderLesson(l){
+  current=l.id;
+  const c=document.getElementById('content');
+  const body = CONTENT[l.id] ? CONTENT[l.id]() : '<p>Coming soon.</p>';
+  const idx = COUNTABLE.indexOf(l.id);
+  let footer='';
+  if(!['playbook','glossary'].includes(l.id)){
+    const prev = idx>0 ? LESSONS.find(x=>x.id===COUNTABLE[idx-1]) : null;
+    const next = idx<COUNTABLE.length-1 ? LESSONS.find(x=>x.id===COUNTABLE[idx+1]) : LESSONS.find(x=>x.id==='playbook');
+    footer = '<div class="complete-btn"><button class="btn" id="completeBtn" onclick="markDone(\''+l.id+'\')">'
+      + (store.isDone(l.id)?'✓ Completed — revisit anytime':'Mark this lesson complete')+'</button></div>'
+      + '<div class="lnav">'
+      + (prev?'<div class="l-prev" onclick="go(\''+prev.id+'\')"><small>← Previous</small><b>'+prev.title+'</b></div>':'<div></div>')
+      + (next?'<div class="l-next" onclick="go(\''+next.id+'\')"><small>Next →</small><b>'+next.title+'</b></div>':'<div></div>')
+      + '</div>';
+  }
+  c.innerHTML = `
+  <div class="lhead">
+    <div class="crumb"><span class="chip">${l.chip}</span> ${PARTS.find(p=>p.id===l.part).name}</div>
+    <h1>${l.title}</h1>
+    <div class="tag">${l.tag}</div>
+    <div class="time">⏱ ${l.time}</div>
+  </div>
+  <div class="lesson-body">${body}</div>
+  ${footer}`;
+  // mount interactive widgets present in this lesson
+  if(MOUNTS[l.id]) MOUNTS[l.id]();
+}
+function markDone(id){ store.complete(id); refreshNav(id);
+  const b=document.getElementById('completeBtn'); if(b){b.textContent='✓ Completed — revisit anytime';}
+}
+
+/* helper for copy buttons */
+function copyPrompt(btn){
+  const box = btn.parentElement;
+  const txt = box.innerText.replace(/^Copy\s*/,'').trim();
+  navigator.clipboard.writeText(txt).then(()=>{ btn.textContent='Copied ✓'; setTimeout(()=>btn.textContent='Copy',1500); });
+}
+
+/* ============================================================ REUSABLE BUILDERS */
+function quiz(qid, question, opts, correct, fbOk, fbNo){
+  let o='';
+  opts.forEach((t,i)=> o+='<button class="opt" onclick="answer(this,'+i+','+correct+',\''+qid+'\')">'+t+'</button>');
+  return '<div class="quiz" data-q="'+qid+'"><div class="qh">✦ Checkpoint</div><div class="q">'+question+'</div>'
+    +o+'<div class="fb ok" data-fb="ok">'+fbOk+'</div><div class="fb no" data-fb="no">'+fbNo+'</div></div>';
+}
+function answer(btn, i, correct, qid){
+  const box = btn.closest('.quiz');
+  box.querySelectorAll('.opt').forEach((b,j)=>{ b.disabled=true; if(j===correct)b.classList.add('correct'); });
+  if(i!==correct) btn.classList.add('wrong');
+  box.querySelector(i===correct?'[data-fb="ok"]':'[data-fb="no"]').classList.add('show');
+}
+function director(title, intro, prompt){
+  return '<div class="director"><div class="dh">🎯 Direct your coder</div><h4>'+title+'</h4><p>'+intro+'</p>'
+    +'<div class="promptbox"><button class="copy" onclick="copyPrompt(this)">Copy</button>'+prompt+'</div></div>';
+}
+function deeper(title, html){
+  return '<details class="deeper"><summary><span class="tw">▶</span>'+title+'</summary><div class="dbody">'+html+'</div></details>';
+}
+function lgPanel(intro, rows, code){
+  let r='';
+  rows.forEach(x=> r+='<div class="maprow"><span class="b">'+x[0]+'</span><span class="arrow">→</span><span class="l">'+x[1]+'</span></div>');
+  return '<div class="lg"><div class="lg-head"><span class="lg-logo">LangGraph</span><span class="lg-t">How this looks in real code</span></div>'
+    +'<div class="lg-body"><p>'+intro+'</p>'+r+(code?code:'')+'</div></div>';
+}
+</script>
+
+<script>
+/* ============================================================ LESSON CONTENT */
+const CONTENT = {};
+
+/* ---------- L1: Meet the Agent ---------- */
+CONTENT.agent = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>Think of a <b>model</b> (like GPT or Claude on its own) as a brilliant copywriter locked in a room with no phone, no internet, and no memory of yesterday. Ask a question and you get a beautifully written answer — but only from what they already knew. An <b>agent</b> is that same copywriter given a desk, a phone, a filing cabinet, and permission to actually <i>do things</i>: look things up, make calls, check their work, and try again if it's wrong.</p></div>
+
+<p>That's the whole leap. Dibia defines an agent as an entity that can <strong>reason, act, communicate, and adapt</strong> to solve problems. A model just generates text. An agent uses a model as its brain but adds the ability to affect the world and respond to what comes back.</p>
+
+<div class="widget" id="loopWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">The agent loop</span><span class="wsub">press play</span></div>
+  <div class="wbody"><div class="loopwrap">
+    <div class="loopstage" id="loopStage"></div>
+    <div class="loop-say" id="loopSay">An agent doesn't answer once — it runs a loop until the job is done. Hit play.</div>
+    <button class="btn sm" id="loopBtn" onclick="playLoop()">▶ Play the loop</button>
+  </div></div>
+</div>
+
+<p>Unlike a model that produces one response, an agent works in <strong>iterative cycles</strong>: it takes an action, perceives the result, and adapts — over and over — until the task is resolved. Dibia calls this the <em>action–perception loop</em>. It's the single most important mental model in this whole subject, because a "multi-agent system" is just several of these loops coordinated together.</p>
+
+<h3 class="sub">The four capabilities</h3>
+<div class="cgrid">
+  <div class="ccard"><h4><span class="ic">🧠</span>Reason</h4><p>Work out what to do next. "‘NVIDIA today' means I need live market data, not what I remember from training."</p></div>
+  <div class="ccard"><h4><span class="ic">⚡</span>Act</h4><p>Do something concrete — call an API, search the web, run code, send a file. Not just talk about it.</p></div>
+  <div class="ccard"><h4><span class="ic">💬</span>Communicate</h4><p>Exchange information with you, with other agents, and with external systems — and ask for clarification.</p></div>
+  <div class="ccard"><h4><span class="ic">🔄</span>Adapt</h4><p>Hit a rate limit? Wait and retry, switch data sources, or rethink the approach based on the error.</p></div>
+</div>
+
+<h3 class="sub">An agent is made of three parts</h3>
+<p>Whenever you brief a coder to "build an agent," you're really specifying these three things:</p>
+<div class="cgrid">
+  <div class="ccard"><h4><span class="ic">🧠</span>Model</h4><p>The reasoning engine (the LLM). The "brain" that decides what to do next.</p></div>
+  <div class="ccard"><h4><span class="ic">🔧</span>Tools</h4><p>The things it can actually <i>do</i> — search, send email, query a database. Tools define its "action space."</p></div>
+  <div class="ccard"><h4><span class="ic">📚</span>Memory</h4><p>What it can recall — recent conversation (short-term) and accumulated knowledge across sessions (long-term).</p></div>
+</div>
+
+${deeper('Go deeper: where the loop came from, and "conversational programming"', `
+<p>The action–perception loop isn't new — it traces back to classic AI (Russell &amp; Norvig): an agent perceives its environment through sensors and acts through actuators. A robot vacuum is the toy example: sense obstacle → turn; sense dirt → suck; sense low battery → dock. Generative-AI agents keep that exact cycle but swap the rigid rules for an LLM that can reason in natural language and adapt.</p>
+<p><b>Conversational programming</b> is the trick that makes this practical in code: every step of the loop — the agent's thought, its action, the tool's result — is represented as a <i>message in a conversation</i>. Modern chat models are trained on exactly this format, so the loop becomes "append a message, ask the model what's next, append the result, repeat." Hold onto this idea — in Lesson 6 you'll see the conversation itself becomes the shared <i>state</i> that a whole team of agents reads and writes.</p>`)}
+
+${lgPanel(
+  'You will rarely hand-write the loop. In LangGraph the prebuilt <code class="inl">create_react_agent</code> gives you a full reason→act→observe loop in one line — you just supply the brain (model), the hands (tools), and optionally the memory.',
+  [['The agent loop','create_react_agent(model, tools)'],['Model (the brain)','model="..." / a chat model'],['Tools (the hands)','tools=[search, send_email]'],['Memory (short-term)','checkpointer=InMemorySaver()']],
+  '<pre><span class="c"># A complete single agent — loop included</span>\n<span class="k">from</span> langgraph.prebuilt <span class="k">import</span> <span class="f">create_react_agent</span>\n\nagent = <span class="f">create_react_agent</span>(\n    model=<span class="s">"openai:gpt-4.1"</span>,\n    tools=[search_web, check_brand_guidelines],\n    prompt=<span class="s">"You are a brand researcher. Always cite sources."</span>,\n)\nresult = agent.<span class="f">invoke</span>({<span class="s">"messages"</span>: [(<span class="s">"user"</span>, <span class="s">"Research Patagonia\'s tone of voice"</span>)]})</pre>')}
+
+${quiz('q-agent','You ask a tool to "tell me today\'s top trending TikTok sound." What makes this a job for an <i>agent</i> and not just a model?',
+  ['The answer needs to be written in a friendly tone','The model already knows it from training','It needs to take a live action — fetch current data — and react to what comes back','It requires more than 100 words'],
+  2,
+  'Exactly. "Today\'s trending" can\'t come from frozen training data — the system has to <b>act</b> (fetch live data) and <b>adapt</b> if the source fails. That action-taking is the line between a model and an agent.',
+  'Not quite. A model can write in any tone, but it can\'t know <i>today\'s</i> trends — that requires taking a live action and reacting to the result, which is what makes it an agent\'s job.')}
+
+${director('Brief a coder to build a single agent',
+  'When you want one agent, specify the three parts explicitly. Vague briefs produce vague agents. Paste and fill in the brackets:',
+  `Build a single agent using LangGraph's create_react_agent.
+
+ROLE: [e.g. "a social-trends researcher for our creative team"]
+BRAIN (model): [e.g. "a strong frontier chat model"]
+TOOLS it can use: [list each, e.g. web search, our brand-guidelines lookup]
+MEMORY: [short-term conversation only? or remember across sessions?]
+WHEN TO STOP: [e.g. "when it has 3 cited sources"]
+
+Show me the agent definition and one example run. Keep tools to the
+few it genuinely needs — don't over-equip it.`)}
+`;
+MOUNTS = {}; // (declared once; lessons add to it below)
+
+/* ---------- L2: One agent or many ---------- */
+CONTENT.oneormany = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>You wouldn't hire a five-person creative team to write a single tweet. You also wouldn't ask one junior to single-handedly run an integrated global campaign. Choosing between <b>one agent</b> and <b>a team of agents</b> is the same judgement call you already make every day about people — matched to the shape of the work.</p></div>
+
+<p>A <strong>multi-agent system</strong> is simply a group of agents, each with different skills and goals, collaborating on a task. The thing that makes it a <i>system</i> (and not just several bots) is <strong>orchestration</strong>: the rules for how they share information and who decides what happens next.</p>
+
+<div class="callout key"><div class="ctitle">The one distinction that organises everything</div>
+<p>There are <b>two fundamentally different ways</b> to orchestrate agents:</p>
+<ul style="margin-bottom:0">
+<li><b>Workflows (you drive)</b> — you pre-define the steps and handoffs. Predictable, repeatable, reliable. Like a production line.</li>
+<li><b>Autonomous (the AI drives)</b> — the agents decide at runtime who does what. Flexible, adaptive, but less predictable. Like a brainstorm.</li>
+</ul></div>
+
+<p>Both use agents with the same anatomy (model, tools, memory) from Lesson 1. They differ only in <em>who makes the orchestration decisions</em> — you, in advance, or the AI, in the moment. Lessons 6 and 7 build one of each. For now, the skill is knowing which level of sophistication a task actually needs.</p>
+
+<div class="widget" id="dtWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">Architecture chooser</span><span class="wsub">answer to find your level</span></div>
+  <div class="wbody"><div id="dtMount"></div></div>
+</div>
+
+<p>Notice the framework climbs a ladder of complexity: <b>model → single agent → multi-agent workflow → autonomous multi-agent system</b>. Each rung adds capability <i>and</i> adds cost, latency, and ways to fail.</p>
+
+<div class="callout warn"><div class="ctitle">⚠️ The guiding principle (tattoo this on your brief)</div>
+<p>“Choose the <b>simplest</b> architecture that effectively addresses your requirements.” Dibia's evaluations are blunt about it: on simple reasoning tasks a direct model call scored 9.7/10 while using <b>24× fewer tokens</b> than a multi-agent system. Multi-agent only pulled ahead when tasks genuinely needed tool coordination or diverse expertise. <b>When in doubt, start simple and grow.</b></p></div>
+
+${deeper('Go deeper: the four signals that a task genuinely wants multiple agents', `
+<p>Dibia lists four task characteristics. The more that are true, the more a multi-agent approach earns its complexity:</p>
+<ul>
+<li><b>Decomposability (planning):</b> the task breaks into distinct steps toward a goal.</li>
+<li><b>Diverse expertise:</b> those steps need genuinely different skills/domains (research vs. legal vs. design).</li>
+<li><b>Extensive context:</b> individual steps each chew through a lot of information.</li>
+<li><b>Adaptive solutions:</b> you can't know the right path until you start acting and seeing results.</li>
+</ul>
+<p>A campaign post-mortem across markets ticks all four. "Translate this caption to French" ticks none — that's a single model call.</p>`)}
+
+${lgPanel(
+  'LangGraph deliberately handles both ends of the ladder with the <i>same</i> tool. A "workflow" and an "autonomous system" are both just graphs — you simply choose whether the routing is fixed (you wire the edges) or decided by an AI at runtime (a node powered by a model picks the next step). That is why people pick LangGraph: you can start as a simple workflow and add autonomy later without switching frameworks.',
+  [['Workflow (you drive)','fixed edges: add_edge(a, b)'],['Autonomous (AI drives)','add_conditional_edges + an LLM router'],['Either way, the container','StateGraph']],
+  '')}
+
+${quiz('q-oom','A client wants: "summarise this one 12-page brief into 5 bullet points." Eager to use your new skills, you reach for a four-agent system. What does the decision framework say?',
+  ['Perfect — more agents means more quality','Use a single model call (or one agent); it\'s a linear, single-domain task','Use autonomous orchestration so it can explore','Add a critic agent and a planner to be safe'],
+  1,
+  'Right. It needs no live actions, no diverse expertise, no exploration — it\'s one domain, one pass. A direct model call is faster, cheaper, and more reliable. Reaching for agents here is the classic over-engineering trap.',
+  'This is the trap the whole lesson warns about. Summarising one document is linear and single-domain — extra agents add cost and failure points for zero benefit. Start simple.')}
+
+${director('Make the architecture decision explicit in your brief',
+  'Before a coder writes anything, hand them your reasoning. This stops them defaulting to an over-complex design — and stops you paying for one.',
+  `Here's the task: [describe it].
+
+I've run the architecture decision framework:
+• Does it need actions beyond text? [yes/no]
+• Is the solution path known and repeatable? [yes/no]
+• Does it need genuinely diverse expertise? [yes/no]
+• Must the approach adapt as results come in? [yes/no]
+
+Based on that I believe the right level is: [model call / single
+agent / multi-agent workflow / autonomous multi-agent].
+
+Tell me if you'd argue for a simpler design — default to the
+simplest thing that works, and explain the trade-off.`)}
+`;
+
+/* ---------- L3: The Six Patterns ---------- */
+CONTENT.patterns = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>Every way of running a creative team you've ever seen is in here. A <b>relay</b> where each person hands to the next. A <b>traffic controller</b> routing briefs to the right specialist. A <b>war room</b> where everyone works in parallel then combines. A <b>producer</b> making a plan and assigning work. A <b>tap on the shoulder</b> handoff. A <b>group chat</b> where whoever's relevant jumps in. Multi-agent patterns are just these — named, and made buildable.</p></div>
+
+<p>Dibia's key insight: all the buzzwords you'll read — "supervisor," "swarm," "hierarchical" — sit on a single <strong>spectrum of autonomy</strong>. At one end, <b>you</b> define the path (workflow patterns). At the other, the <b>agents</b> decide at runtime (autonomous patterns). Six patterns cover the whole range. Click each to explore it.</p>
+
+<div class="widget" id="pgWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">The pattern gallery</span><span class="wsub">click a card</span></div>
+  <div class="wbody"><div id="pgMount"></div></div>
+</div>
+
+<h3 class="sub">The trade-off, in one table</h3>
+<div class="tablewrap"><table class="cmp">
+<tr><th>Pattern</th><th>Who decides flow</th><th>Autonomy</th><th>Your control</th><th>Complexity</th></tr>
+<tr><td><b>Sequential</b></td><td>You (A→B→C)</td><td><span class="pill lo">Low</span></td><td><span class="pill hi">High</span></td><td><span class="pill lo">Low</span></td></tr>
+<tr><td><b>Conditional / Supervisor</b></td><td>You (rules route)</td><td><span class="pill lo">Low</span></td><td><span class="pill hi">High</span></td><td><span class="pill md">Low–Med</span></td></tr>
+<tr><td><b>Parallel</b></td><td>You (fan-out/in)</td><td><span class="pill lo">Low</span></td><td><span class="pill hi">High</span></td><td><span class="pill md">Medium</span></td></tr>
+<tr><td><b>Plan-based</b></td><td>An orchestrator AI</td><td><span class="pill md">Medium</span></td><td><span class="pill hi">High</span></td><td><span class="pill md">Medium</span></td></tr>
+<tr><td><b>Handoff</b></td><td>Each agent, locally</td><td><span class="pill md">Medium</span></td><td><span class="pill md">Medium</span></td><td><span class="pill lo">Low</span></td></tr>
+<tr><td><b>Group chat (AI-driven)</b></td><td>An AI selector</td><td><span class="pill hi">High</span></td><td><span class="pill hi">Low</span></td><td><span class="pill md">Medium</span></td></tr>
+</table></div>
+<p style="font-size:14px;color:var(--muted)">Notice control and autonomy move in opposite directions. That's the whole game: you trade predictability for flexibility. There is no "best" pattern — only the right one for the task.</p>
+
+<div class="callout key"><div class="ctitle">🪆 Agents all the way down</div>
+<p>A powerful idea: any single "agent" in a pattern can <b>itself be a whole multi-agent system inside</b>. Your plan-based "Coder agent" might privately run a sequential research→write→test workflow. A handoff "Research Team" might run its own group chat. This lets you use the right pattern at each level instead of forcing one everywhere — and it keeps each layer simple.</p></div>
+
+${deeper('Go deeper: the two "task management" concerns that cut across every pattern', `
+<p>No matter which pattern you choose, two operational questions always apply:</p>
+<p><b>1. Termination — when does it stop?</b> Without this, autonomous systems loop forever and burn money. Three approaches: <i>budget-based</i> (max messages, tokens, time), <i>semantic</i> (an LLM judges the task is done), and <i>external</i> (a human or API says stop). Real systems combine them: "stop after 10 rounds OR when quality is met, whichever first."</p>
+<p><b>2. Human delegation — when does it escalate to a person?</b> Either <i>LLM-based</i> ("this complaint mentions legal action — escalate") or <i>rule-based</i> ("any transaction over $10,000 needs sign-off"). You'll meet this again as a UX principle in Lesson 4 and a failure mode in Lesson 9.</p>`)}
+
+${lgPanel(
+  'Here is the satisfying part: LangGraph has a direct construct for each pattern. The three workflow patterns are just how you wire edges. The autonomous ones have prebuilt helpers.',
+  [['Sequential','add_edge(a, b) chained'],['Conditional / Supervisor','add_conditional_edges(...)'],['Parallel','multiple edges fan-out + a reducer fan-in'],['Plan-based / Supervisor','langgraph-supervisor: create_supervisor(...)'],['Handoff','Command(goto=...) / langgraph-swarm'],['Group chat','a loop over a shared messages state']],
+  '')}
+
+${quiz('q-pat','Your task: "fetch yesterday\'s ad spend, clean the numbers, then save a report." The steps are fixed and always run in the same order. Which pattern, and why?',
+  ['AI-driven group chat — maximum flexibility','Sequential workflow — the path is fixed, so keep it predictable and cheap','Handoff — let agents decide','Plan-based — let an orchestrator plan it'],
+  1,
+  'Spot on. Fixed, known, ordered steps = sequential workflow. Using an AI to "decide" a path that never changes just adds cost and unpredictability — Dibia explicitly flags that as an anti-pattern (3–5× the cost for no benefit).',
+  'Re-read the table: when steps are fixed and always in the same order, autonomy buys you nothing and costs you money. A sequential workflow is the right call — predictable, cheap, easy to debug.')}
+
+${director('Name the pattern — don\'t make the coder guess',
+  'The single most useful thing you can put in a multi-agent brief is the pattern name plus your reasoning. It collapses a hundred ambiguous decisions into one clear instruction.',
+  `Build a multi-agent system for: [task].
+
+Orchestration pattern: [Sequential / Conditional-Supervisor /
+Parallel / Plan-based / Handoff / Group-chat].
+
+Why this pattern: [your reasoning — fixed steps? needs routing?
+independent subtasks? unknown decomposition?].
+
+Agents involved: [list each agent + its one job].
+Termination: [how it should know when to stop].
+Escalate to a human when: [conditions, or "never"].
+
+If you think a different pattern fits the task better, say so and
+explain the trade-off before building.`)}
+`;
+
+/* ---------- L4: UX / human in the loop ---------- */
+CONTENT.ux = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>Imagine handing a freelancer your company card. You'd want to know: <b>what are they good at</b> (so you give the right jobs), <b>which spends need your sign-off</b> (coffee, sure; a $5k media buy, ask me first), <b>a clear log of what they did and why</b>, and a <b>way to tap them on the shoulder</b> mid-task. Those four instincts are exactly the four UX principles that make autonomous agents trustworthy.</p></div>
+
+<p>Here's the uncomfortable truth about autonomous systems: the <strong>same input can produce a different path every time</strong>. That non-determinism is the source of both their power and their unreliability. You can't make them perfectly predictable — so instead you design the experience <i>around</i> them so people can trust, steer, and recover. These principles aren't fluff; they become concrete things you ask your coder to build.</p>
+
+<div class="cgrid">
+  <div class="ccard"><h4><span class="ic">🔍</span>Capability discovery</h4><p>Help people learn what the system is actually good at — e.g. preset example tasks — so they don't fling unsuitable jobs at it and lose trust.</p></div>
+  <div class="ccard"><h4><span class="ic">⚖️</span>Cost-aware delegation</h4><p>Not all actions are equal. Reading an email is harmless; sending a confidential file isn't. Communicate the stakes and let people set what needs approval.</p></div>
+  <div class="ccard"><h4><span class="ic">👁️</span>Observability &amp; provenance</h4><p>Show what each agent did and <i>why</i>, with sources. When something fails, "Calendar Agent blocked the date" beats "Error: booking failed."</p></div>
+  <div class="ccard"><h4><span class="ic">⏸️</span>Interruptibility</h4><p>Let people pause, correct, and resume without losing progress. Long autonomous runs need a stop button and a way to course-correct.</p></div>
+</div>
+
+<p>Of these, <strong>cost-aware delegation</strong> is the one that most directly keeps you out of trouble. Try it — sort these agent actions into "safe to auto-run" vs "ask me first":</p>
+
+<div class="widget" id="rcWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">Risk classifier</span><span class="wsub">tap an action, then tap a bin</span></div>
+  <div class="wbody"><div id="rcMount"></div></div>
+</div>
+
+<div class="callout key"><div class="ctitle">The three-tier rule of thumb</div>
+<p><b>Low cost</b> (read-only, reversible) → auto-run. <b>Medium cost</b> (changes things, recoverable) → notify after / preview. <b>High cost</b> (irreversible, expensive, or sensitive) → always ask first. The art is tuning it: too strict and people drown in approvals; too loose and an agent emails the wrong client. Lesson 9 shows how to measure if you got the balance right.</p></div>
+
+${deeper('Go deeper: who is the user, really?', `
+<p>Dibia points out these systems serve <b>two</b> very different users, and good UX speaks to both:</p>
+<ul>
+<li><b>End users (e.g. "Jane")</b> need <i>functional transparency</i>: plain-language progress ("found 3 flights, checking your calendar"), simple approve/reject, an undo. They don't want the internals.</li>
+<li><b>Developers / power users</b> need <i>coordination transparency</i>: full handoff traces, which agent did what, token/cost metrics, conflict logs — the stuff you need to debug why a run went sideways.</li>
+</ul>
+<p>When you brief a coder, say which audience the interface is for. "Show the agent's reasoning" means something very different to each.</p>`)}
+
+${lgPanel(
+  'Two of these four principles are first-class features in LangGraph — which is a big reason it\'s production-popular. Interruptibility and approvals are handled by the same mechanism: <code class="inl">interrupt()</code> pauses the graph mid-run and waits for a human, and the <i>checkpointer</i> saves state so you can resume exactly where you left off. Observability comes from streaming events and LangSmith tracing.',
+  [['Cost-aware approval','interrupt("Approve sending this email?")'],['Interruptibility / pause + resume','checkpointer + Command(resume=...)'],['Observability (live progress)','graph.stream(...) events'],['Observability (full trace)','LangSmith tracing']],
+  '<pre><span class="c"># Pause for human approval before a high-cost action</span>\n<span class="k">from</span> langgraph.types <span class="k">import</span> interrupt, Command\n\n<span class="k">def</span> <span class="f">send_campaign_email</span>(state):\n    decision = <span class="f">interrupt</span>({<span class="s">"action"</span>: <span class="s">"send email"</span>, <span class="s">"to"</span>: state[<span class="s">"recipient"</span>]})\n    <span class="k">if</span> decision == <span class="s">"approve"</span>:\n        <span class="k">return</span> {<span class="s">"sent"</span>: <span class="k">True</span>}\n    <span class="k">return</span> {<span class="s">"sent"</span>: <span class="k">False</span>}\n<span class="c"># ...later, a human resumes: graph.invoke(Command(resume="approve"), config)</span></pre>')}
+
+${quiz('q-ux','An agent is about to delete 400 rows from the live customer database to "clean up duplicates." Under cost-aware delegation, what should happen?',
+  ['Auto-run — it\'s just data cleanup','Pause and require explicit human approval — it\'s irreversible and high-cost','Log it and carry on','Ask another agent to approve it'],
+  1,
+  'Yes. Irreversible + affects live data = high cost = always require human approval (in LangGraph, an interrupt()). To an agent, "delete rows" and "search the web" look equally weighted — your design has to encode the difference.',
+  'The danger is precisely that an agent treats "delete 400 live rows" as casually as a web search. Irreversible, high-stakes actions must pause for human approval — that\'s the core of cost-aware delegation.')}
+
+${director('Specify the approval policy and the human controls',
+  'Don\'t leave safety implicit. Tell the coder exactly which actions pause, and what people can see and do. This is where most "scary agent" stories are prevented.',
+  `For this agent system, implement cost-aware delegation:
+
+LOW-cost (auto-run): [list read-only/reversible actions]
+HIGH-cost (require human approval via interrupt()):
+   [list irreversible/expensive/sensitive actions]
+
+The user must be able to:
+• see live progress in plain language (stream events)
+• see WHY each step happened, with sources
+• pause, correct, and resume without losing state (checkpointer)
+
+Audience for the interface: [end-user simple / power-user detailed].
+Use LangGraph's interrupt() + checkpointer for the pause/resume.`)}
+`;
+
+/* ---------- L5: Inside a single agent ---------- */
+CONTENT.insideagent = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>In Lesson 1 we said an agent is brain + tools + memory. Now we open the hood. Think of it like spec-ing out a new hire's setup: what software do they get (tools), what filing system (memory), what's the standard operating procedure when they hit a wall (the loop), what needs manager sign-off (guardrails), and how much can we cram on their desk before they get overwhelmed (context)?</p></div>
+
+<p>This lesson is your vocabulary for describing <b>what an individual agent is made of</b>. You won't build it by hand — but naming these parts precisely is what separates a brief that produces a reliable agent from one that produces a confused one.</p>
+
+<h3 class="sub">1 · The execution loop</h3>
+<p>Under the hood, every agent runs the loop from Lesson 1: think → call a tool → read the result → repeat → answer. Good implementations <b>stream</b> these steps as they happen (so you see progress), and support <b>cancellation</b> (so you can stop a runaway). When you hear "agent loop," picture that cycle turning.</p>
+
+<h3 class="sub">2 · Tools — the action space</h3>
+<p>Tools are the single biggest lever on what an agent can reliably do. Dibia's rule is blunt and worth memorising: <strong>reliability over breadth — 10 excellent tools beat 50 mediocre ones.</strong> Too many tools and the agent gets confused and fills its context with clutter. Tools come in two flavours: <i>general-purpose</i> (a code runner, a browser) and <i>domain-specific</i> (your "check brand guidelines" API).</p>
+<div class="callout tip"><div class="ctitle">💡 The "think tool" trick</div><p>One surprisingly powerful tool is a <b>structured-reasoning tool</b> the agent calls to plan before acting. Anthropic's research showed it can improve performance meaningfully on complex tasks. It's a recurring theme: sometimes the best "action" is structured thought.</p></div>
+
+<h3 class="sub">3 · Memory — short, long, and who controls it</h3>
+<div class="cgrid">
+  <div class="ccard"><h4>🕐 Short-term</h4><p>Working memory for the current task — the conversation so far. In a team, this is the <i>shared context</i> agents coordinate through.</p></div>
+  <div class="ccard"><h4>🗄️ Long-term</h4><p>Knowledge that persists across sessions — usually via <b>RAG</b>: store info as searchable vectors, retrieve the relevant bits on demand.</p></div>
+  <div class="ccard"><h4>🛠️ Application-managed</h4><p>Your code decides what to store and retrieve, automatically. Predictable.</p></div>
+  <div class="ccard"><h4>🤖 Agent-managed</h4><p>The agent decides, using memory <i>tools</i> — it curates its own knowledge. More autonomous.</p></div>
+</div>
+<p style="font-size:14.5px;color:var(--ink2)">Not every agent needs long-term memory — stateless agents are simpler and faster. Add memory only when "remembering" measurably improves results (Lesson 9 returns to this).</p>
+
+<h3 class="sub">4 · Guardrails &amp; humans in the loop</h3>
+<p>Two control layers wrap the agent: <b>middleware</b> (code that runs before/after each step — for logging, safety checks, redaction) and <b>human approval</b> for high-cost tool calls (the cost-aware delegation from Lesson 4). Observability tooling like <b>OpenTelemetry</b> traces every step so you can debug and audit.</p>
+
+<h3 class="sub">5 · Context engineering</h3>
+<div class="callout warn"><div class="ctitle">⚠️ The hidden killer: context rot</div>
+<p>An agent's context window is finite. Stuff too much in — long histories, bloated tool outputs, every memory — and quality <i>degrades</i> ("context rot" / "context explosion"). <b>Context engineering</b> is the discipline of feeding the agent only what it needs, when it needs it: summarising old history, trimming tool outputs, retrieving memories selectively. It's the agent-design equivalent of a tight creative brief — less, but the right less.</p></div>
+
+${deeper('Go deeper: "agents as tools," the recursion that powers big systems', `
+<p>Here's the elegant trick that makes the "agents all the way down" idea from Lesson 3 concrete: <b>an entire agent can be wrapped up and handed to another agent as if it were a single tool.</b></p>
+<p>So a "lead" agent might have a tool called <code class="inl">research_team</code> — and calling it actually runs a whole sub-team. The lead doesn't know or care about the internal complexity; it just sees a tool that returns a result. This is exactly how the handoff pattern (Lesson 3) is implemented, and how systems like Anthropic's research system spin up many sub-agents on demand. Tools, agents, and teams become interchangeable building blocks.</p>`)}
+
+${lgPanel(
+  'In LangGraph these parts have clean homes. A tool is a plain Python function with the <code class="inl">@tool</code> decorator. Short-term memory is the messages in your state (Lesson 6). Long-term memory across sessions is a <code class="inl">Store</code>. Guardrails are "middleware" / pre-post hooks. And "an agent as a tool" is a real, common move.',
+  [['A tool','@tool def search(q: str) -> str'],['Short-term memory','messages in graph state + checkpointer'],['Long-term memory','a Store (e.g. InMemoryStore / vector store)'],['Guardrails / hooks','agent middleware (pre/post hooks)'],['An agent used as a tool','wrap a compiled graph as a @tool']],
+  '<pre><span class="c"># A tool is just a documented function</span>\n<span class="k">from</span> langchain_core.tools <span class="k">import</span> tool\n\n<span class="k">@tool</span>\n<span class="k">def</span> <span class="f">check_brand_guidelines</span>(text: str) -> str:\n    <span class="s">"""Check copy against our brand voice rules. Returns pass/fail + notes."""</span>\n    <span class="k">return</span> run_brand_check(text)\n\n<span class="c"># The docstring IS the instruction the model reads. Write it well.</span></pre>')}
+
+${quiz('q-inside','Your agent keeps "forgetting" instructions you gave it 20 messages ago and its answers are getting worse the longer it runs. Most likely cause?',
+  ['It needs more tools','Context rot — the window is overloaded; it needs context engineering (trimming/summarising)','The model is broken','It needs a second agent'],
+  1,
+  'Right. Degradation as a run gets longer is the signature of context rot. The fix is context engineering — summarise old history, trim bulky tool outputs, retrieve memory selectively. More tools would make it worse, not better.',
+  'Adding tools or agents here would worsen it. The classic "gets worse the longer it runs" symptom is context rot — too much crammed into a finite window. The fix is context engineering: feed it less, but the right less.')}
+
+${director('Spec the agent\'s internals, not just its job',
+  'A reliable agent comes from a precise parts list. Use this to make the coder commit to specifics you can sanity-check.',
+  `Spec this agent's internals:
+
+TOOLS (few, excellent, domain-specific): [list each + what it returns]
+  — write a clear docstring for each; that's what the model reads.
+MEMORY: [stateless / short-term only / long-term via a Store + why]
+GUARDRAILS: [what gets logged, redacted, or safety-checked]
+HIGH-COST tool calls needing approval: [list]
+CONTEXT STRATEGY: [how we keep the window lean — summarise history?
+  trim tool outputs? retrieve memory selectively?]
+
+Flag any tool you think is redundant — I'd rather have 8 great tools
+than 20 noisy ones.`)}
+`;
+
+/* ---------- L6: Graphs -> LangGraph ---------- */
+CONTENT.graphs = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>Picture a wall of sticky notes connected by string — a campaign flowchart. Each <b>sticky note</b> is a job ("research the audience," "draft three concepts," "check legal"). Each <b>string</b> is an arrow saying "after this, do that." Some strings have conditions ("only go to legal if the claim is medical"). That wall <i>is</i> a graph. And a graph is <i>exactly</i> what LangGraph — and Dibia's whole workflow model — is built on. This lesson is where the book and the framework become the same thing.</p></div>
+
+<p>Dibia: "A workflow is fundamentally a <strong>computational graph</strong> — a container that holds <strong>Steps</strong> (nodes: units of work) and <strong>Edges</strong> (connections that define what happens next, and under what conditions)." Modeling agent systems as graphs buys you four superpowers:</p>
+<div class="cgrid">
+  <div class="ccard"><h4>✅ Validation</h4><p>Check the whole path makes sense <i>before</i> you run it.</p></div>
+  <div class="ccard"><h4>👁️ Visualization</h4><p>You can literally draw it — and so reason about it.</p></div>
+  <div class="ccard"><h4>🎯 Predictability</h4><p>Deterministic, repeatable execution.</p></div>
+  <div class="ccard"><h4>⚡ Parallelism</h4><p>Independent branches can run at the same time.</p></div>
+</div>
+
+<p>Let's run one. Below is a real (if simplified) campaign workflow as a graph. Step through it and watch two things: which <b>node</b> is active, and how the <b>shared state</b> — the data every node reads and writes — fills up as you go.</p>
+
+<div class="widget" id="gtWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">Graph tracer — a campaign workflow</span><span class="wsub">step through it</span></div>
+  <div class="wbody"><div id="gtMount"></div></div>
+</div>
+
+<h3 class="sub">The four ideas you just watched</h3>
+<ul>
+<li><b>Nodes (Steps):</b> each does one unit of work — takes the state in, returns an update to it.</li>
+<li><b>Edges:</b> the arrows. A plain edge always fires; a <b>conditional edge</b> looks at the state and <i>chooses</i> the next node (that's branching, supervisors, and routing — all the same mechanism).</li>
+<li><b>Shared state:</b> the single object that flows through the graph. Nodes don't shout at each other; they read and write this shared "whiteboard." This is the most important concept in LangGraph.</li>
+<li><b>Build vs. run:</b> first you <i>construct</i> the graph (wire nodes + edges), then you <i>compile</i> it into something runnable, then you run it. Construction and execution are separate phases — which is why it can be validated and visualised before it ever runs.</li>
+</ul>
+
+<div class="callout key"><div class="ctitle">🔑 The single idea to take away</div>
+<p>In LangGraph, agents don't pass messages directly to each other. They all read from and write to <b>one shared state object</b>. A "reducer" decides <i>how</i> updates merge — e.g. new messages get <b>appended</b> to the list (not overwritten). Once this clicks, every LangGraph codebase suddenly makes sense.</p></div>
+
+${lgPanel(
+  'Here is the entire translation, and then the actual code. Read the code slowly — every line maps to a sticky note or a string on your wall.',
+  [['Workflow / the whole graph','StateGraph'],['Step / node','a function + add_node("name", fn)'],['Edge (always)','add_edge("a", "b")'],['Conditional edge (branch/route)','add_conditional_edges("a", router)'],['Start &amp; finish','START, END'],['Shared state','a TypedDict'],['How updates merge (e.g. append)','Annotated[list, add_messages] — a reducer'],['Build → run','builder.compile() then .invoke()'],['Save &amp; resume progress','checkpointer + thread_id']],
+  '<pre><span class="k">from</span> langgraph.graph <span class="k">import</span> StateGraph, START, END\n<span class="k">from</span> typing <span class="k">import</span> Annotated\n<span class="k">from</span> typing_extensions <span class="k">import</span> TypedDict\n<span class="k">from</span> operator <span class="k">import</span> add\n\n<span class="c"># 1) The shared whiteboard every node reads & writes</span>\n<span class="k">class</span> <span class="f">CampaignState</span>(TypedDict):\n    brief: str\n    research: str\n    concepts: Annotated[list, add]   <span class="c"># reducer: new concepts APPEND, not overwrite</span>\n    approved: bool\n\n<span class="c"># 2) Nodes — each takes state, returns an update to it</span>\n<span class="k">def</span> <span class="f">research</span>(state): <span class="k">return</span> {<span class="s">"research"</span>: do_research(state[<span class="s">"brief"</span>])}\n<span class="k">def</span> <span class="f">ideate</span>(state):   <span class="k">return</span> {<span class="s">"concepts"</span>: [draft_concept(state)]}\n<span class="k">def</span> <span class="f">legal</span>(state):    <span class="k">return</span> {<span class="s">"approved"</span>: legal_ok(state[<span class="s">"concepts"</span>])}\n\n<span class="c"># 3) A conditional edge = a router that reads state and picks the next node</span>\n<span class="k">def</span> <span class="f">needs_legal</span>(state) -> str:\n    <span class="k">return</span> <span class="s">"legal"</span> <span class="k">if</span> has_medical_claim(state) <span class="k">else</span> END\n\n<span class="c"># 4) Build the graph (wire the sticky notes + strings)</span>\nbuilder = <span class="f">StateGraph</span>(CampaignState)\nbuilder.<span class="f">add_node</span>(<span class="s">"research"</span>, research)\nbuilder.<span class="f">add_node</span>(<span class="s">"ideate"</span>, ideate)\nbuilder.<span class="f">add_node</span>(<span class="s">"legal"</span>, legal)\nbuilder.<span class="f">add_edge</span>(START, <span class="s">"research"</span>)\nbuilder.<span class="f">add_edge</span>(<span class="s">"research"</span>, <span class="s">"ideate"</span>)\nbuilder.<span class="f">add_conditional_edges</span>(<span class="s">"ideate"</span>, needs_legal)  <span class="c"># branch!</span>\nbuilder.<span class="f">add_edge</span>(<span class="s">"legal"</span>, END)\n\n<span class="c"># 5) Compile (build->run boundary), then run</span>\ngraph = builder.<span class="f">compile</span>()\nresult = graph.<span class="f">invoke</span>({<span class="s">"brief"</span>: <span class="s">"launch the spring line"</span>})</pre>')}
+
+${deeper('Go deeper: checkpointing, the feature that makes it production-grade', `
+<p>When you compile with a <b>checkpointer</b>, LangGraph saves the entire state after every step, keyed by a <code class="inl">thread_id</code>. This one feature unlocks a surprising amount:</p>
+<ul>
+<li><b>Memory across turns:</b> the same thread remembers the conversation — that's how a chatbot has continuity.</li>
+<li><b>Pause &amp; resume:</b> the <code class="inl">interrupt()</code> from Lesson 4 works because state is saved; a human can approve hours later and it picks up exactly where it stopped.</li>
+<li><b>Crash recovery &amp; scale:</b> if a server dies mid-run, another can reload the state and continue. Dibia calls this "stateless horizontal scaling" — the state lives in storage, not in the running process.</li>
+</ul>
+<pre><span class="k">from</span> langgraph.checkpoint.memory <span class="k">import</span> InMemorySaver
+graph = builder.<span class="f">compile</span>(checkpointer=<span class="f">InMemorySaver</span>())
+config = {<span class="s">"configurable"</span>: {<span class="s">"thread_id"</span>: <span class="s">"client-acme"</span>}}
+graph.<span class="f">invoke</span>(inputs, config)   <span class="c"># this thread now remembers</span></pre>
+<p>In production you swap <code class="inl">InMemorySaver</code> for a database-backed one (e.g. Postgres). Same code, durable memory.</p>`)}
+
+${quiz('q-graph','In LangGraph, how do two nodes "pass information" to each other?',
+  ['They call each other directly like functions','They both read from and write to one shared state object','They send each other emails','They can\'t — nodes are isolated'],
+  1,
+  'Exactly — this is THE LangGraph mental model. Nodes never talk directly; they read and write a single shared state. A reducer decides how each update merges (e.g. messages append). Internalise this and you can read any LangGraph repo.',
+  'This is the one idea to lock in: nodes do NOT call each other. They all read and write a single shared state object, and reducers decide how updates merge. That indirection is what makes the graph inspectable and resumable.')}
+
+${director('Brief a LangGraph workflow as a graph',
+  'Because LangGraph thinks in graphs, briefing it in graph terms is a cheat code. Describe the state, the nodes, and the edges — and you\'ve basically handed over the design.',
+  `Build this as a LangGraph StateGraph.
+
+SHARED STATE (the fields every node reads/writes):
+  [e.g. brief: str, research: str, concepts: list (should APPEND),
+   approved: bool]
+
+NODES (each = one job, returns a state update):
+  [name → what it does]
+
+EDGES (the flow):
+  [START → ...; plain edges; and any CONDITIONAL edges, e.g.
+   "after ideate, go to legal ONLY IF there's a medical claim,
+   otherwise END"]
+
+Use a reducer so [field] accumulates instead of overwriting.
+Compile with a checkpointer + thread_id so runs are resumable.
+Draw the graph (mermaid) before writing the nodes so I can check the flow.`)}
+`;
+
+/* ---------- L7: Autonomous orchestration ---------- */
+CONTENT.orchestration = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>In Lesson 6 <b>you</b> drew the flowchart. Now we hand the marker to the AI. <b>Autonomous orchestration</b> is when the control flow — who goes next — is decided at runtime by a model, not pre-wired by you. It's the difference between a scripted shoot and an improv session with a good director keeping it on track.</p></div>
+
+<p>The engine behind all autonomous patterns is an <strong>orchestrator loop</strong>: pick who acts next → let them act → add their output to the shared conversation → check if we should stop → repeat. The only thing that changes between patterns is <b>how "who's next" is decided</b>. Run them and watch:</p>
+
+<div class="widget" id="osWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">Orchestration simulator</span><span class="wsub">pick a style, press run</span></div>
+  <div class="wbody"><div id="osMount"></div></div>
+</div>
+
+<h3 class="sub">The three you just ran</h3>
+<div class="cgrid">
+  <div class="ccard"><h4>🔁 Round-robin</h4><p>Fixed rotation: researcher → writer → critic → repeat. Dead simple, predictable turn-taking. Great default.</p></div>
+  <div class="ccard"><h4>🧭 AI-driven (group chat)</h4><p>An LLM "selector" reads the conversation and picks who should speak next: "research is done, so the writer goes." Adaptive, natural — but less predictable.</p></div>
+  <div class="ccard"><h4>📋 Plan-based</h4><p>One orchestrator acts as project manager: makes a plan, assigns each step, checks the result, and re-plans or retries if a step fails.</p></div>
+</div>
+
+<div class="callout key"><div class="ctitle">🛑 The non-negotiable: termination</div>
+<p>Autonomous loops will run forever (and bill you forever) without a <b>termination condition</b>. Every simulation above stopped because of one. In practice you compose several: "stop after N messages OR when an agent signals the task is complete OR when a human says stop." Forgetting this is one of the most expensive mistakes in the field — Lesson 9 has the war stories.</p></div>
+
+${deeper('Go deeper: plan-based orchestration and "metacognition"', `
+<p>Plan-based is the most sophisticated autonomous pattern, and it powers some famous systems. The orchestrator: (1) generates an explicit plan, (2) assigns step 1 to the right agent with only the context it needs, (3) <b>evaluates whether that step actually succeeded</b>, and (4) either proceeds, retries with better instructions, or re-plans. That self-evaluation step is <b>metacognition</b> — the system thinking about its own progress.</p>
+<p>Two landmark examples Dibia cites: Microsoft's <b>Magentic-One</b> (which won the GAIA benchmark using explicit "task" and "progress" ledgers, ~31% improvement from self-monitoring) and <b>Anthropic's research system</b> (a lead agent dynamically spawning 1–10+ sub-agents in parallel, a ~90% improvement over single-agent). Both are plan-based orchestration with a manager that watches its own work. Both also mix in workflows for the predictable parts — which is the hybrid approach Lesson 3 mentioned.</p>`)}
+
+${lgPanel(
+  'LangGraph builds autonomous orchestration on the same graph engine — the orchestrator is just a node (powered by a model) that decides where to go next, usually via Command(goto=...) or a conditional edge. For the two most common shapes there are prebuilt packages.',
+  [['Plan-based / supervisor','langgraph-supervisor: create_supervisor(...)'],['Handoff (peer-to-peer)','langgraph-swarm: create_swarm(...)'],['AI picks next speaker','a router node returning Command(goto=name)'],['Round-robin','a simple loop / cycle of edges'],['Stop the loop','recursion_limit + an edge to END']],
+  '<pre><span class="c"># Plan-based orchestration, prebuilt: a supervisor routes to workers</span>\n<span class="k">from</span> langgraph_supervisor <span class="k">import</span> create_supervisor\n<span class="k">from</span> langgraph.prebuilt <span class="k">import</span> create_react_agent\n\nresearcher = <span class="f">create_react_agent</span>(model, [search], name=<span class="s">"researcher"</span>)\nwriter     = <span class="f">create_react_agent</span>(model, [], name=<span class="s">"writer"</span>)\ncritic     = <span class="f">create_react_agent</span>(model, [], name=<span class="s">"critic"</span>)\n\napp = <span class="f">create_supervisor</span>(\n    agents=[researcher, writer, critic],\n    model=model,\n    prompt=<span class="s">"You are the producer. Assign work, check it, decide who is next."</span>,\n).<span class="f">compile</span>()</pre>')}
+
+${quiz('q-orch','You build an AI-driven group chat of 3 agents and let it run on a real task. The bill is huge and it sometimes never finishes. The single most likely culprit?',
+  ['Too few agents','No (or weak) termination condition — the loop never reliably stops','The model is too smart','Round-robin would have the same issue identically'],
+  1,
+  'Right. Autonomous loops must be told when to stop. Without solid termination (max messages, a completion signal, a human stop), token cost grows with every turn and the system can spin. Compose multiple conditions and set conservative limits first.',
+  'The signature of "huge bill + never finishes" is missing or weak termination. Autonomous orchestration keeps looping until a condition says stop — and tokens cost money every turn. Always compose termination conditions.')}
+
+${director('Brief an autonomous system — with brakes',
+  'Autonomy is where costs and chaos hide. A good brief names the orchestration style AND every brake. Notice how much of this is about stopping, not starting.',
+  `Build an autonomous multi-agent system for: [task].
+
+ORCHESTRATION STYLE: [round-robin / AI-driven group chat /
+  plan-based supervisor] — because [reason].
+
+AGENTS: [name → role → tools each].
+
+TERMINATION (compose several):
+  • hard cap: max [N] messages / [budget] tokens / [time]
+  • completion signal: agents call a "task complete" tool when done
+  • human stop: a way for me to halt it mid-run
+
+START with the simplest style that could work; only add autonomy
+where a fixed workflow demonstrably falls short. Log every step so
+I can see who did what and why.`)}
+`;
+
+/* ---------- L8: Frameworks + LangGraph in full ---------- */
+CONTENT.frameworks = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>You <i>could</i> build a campaign by buying raw chemicals and coating your own film. Or you could use a camera. A <b>framework</b> like LangGraph is the camera: someone solved the hard, boring, easy-to-get-wrong plumbing so you can focus on the creative decisions. This lesson gives you the full LangGraph vocabulary — enough to open any LangGraph project and understand what every piece is doing.</p></div>
+
+<p>Dibia spends the whole book building a framework from scratch precisely so you understand what one gives you. Here are the ten capabilities a real framework provides — the reasons not to roll your own:</p>
+<div class="cgrid">
+  <div class="ccard"><h4>1 · Clean abstractions</h4><p>Sensible building blocks (graphs, nodes, agents) instead of raw glue code.</p></div>
+  <div class="ccard"><h4>2 · Async + streaming</h4><p>Real-time progress and concurrency built in.</p></div>
+  <div class="ccard"><h4>3 · Observability</h4><p>Tracing &amp; debugging tools (LangSmith) so you can see inside a run.</p></div>
+  <div class="ccard"><h4>4 · State &amp; persistence</h4><p>Checkpointing, memory, resume — the Lesson 6 superpowers.</p></div>
+  <div class="ccard"><h4>5 · Declarative config</h4><p>Describe the system; get reproducible behaviour.</p></div>
+  <div class="ccard"><h4>6 · Guardrails &amp; middleware</h4><p>Safety, approvals, redaction as first-class hooks.</p></div>
+  <div class="ccard"><h4>7 · Pattern support</h4><p>The Lesson 3 patterns, prebuilt and extensible.</p></div>
+  <div class="ccard"><h4>8 · Deployment &amp; ops</h4><p>Production serving, scaling, security.</p></div>
+  <div class="ccard"><h4>9 · Evaluation &amp; testing</h4><p>Hooks to measure quality (Lesson 9).</p></div>
+  <div class="ccard"><h4>10 · Living ecosystem</h4><p>Upgrades, community, longevity — it improves without you.</p></div>
+</div>
+
+<h3 class="sub">The complete LangGraph vocabulary</h3>
+<p>You've met most of these across the course. Here they are in one place. After this, a LangGraph repo is readable to you.</p>
+<div class="lg"><div class="lg-head"><span class="lg-logo">LangGraph</span><span class="lg-t">Everything, in one map</span></div><div class="lg-body">
+<div class="maprow"><span class="b">StateGraph</span><span class="arrow">→</span><span class="l">the whole system — your graph of nodes &amp; edges</span></div>
+<div class="maprow"><span class="b">State (a TypedDict)</span><span class="arrow">→</span><span class="l">the shared whiteboard all nodes read/write</span></div>
+<div class="maprow"><span class="b">Reducer (Annotated[...])</span><span class="arrow">→</span><span class="l">how updates merge — e.g. add_messages appends</span></div>
+<div class="maprow"><span class="b">Node</span><span class="arrow">→</span><span class="l">a function doing one unit of work</span></div>
+<div class="maprow"><span class="b">Edge / conditional edge</span><span class="arrow">→</span><span class="l">fixed flow / a router that reads state &amp; chooses</span></div>
+<div class="maprow"><span class="b">START / END</span><span class="arrow">→</span><span class="l">entry and exit of the graph</span></div>
+<div class="maprow"><span class="b">compile()</span><span class="arrow">→</span><span class="l">turn the blueprint into a runnable app</span></div>
+<div class="maprow"><span class="b">invoke() / stream()</span><span class="arrow">→</span><span class="l">run it (all at once / streaming progress)</span></div>
+<div class="maprow"><span class="b">checkpointer + thread_id</span><span class="arrow">→</span><span class="l">save state → memory, resume, crash recovery</span></div>
+<div class="maprow"><span class="b">interrupt() + Command(resume)</span><span class="arrow">→</span><span class="l">pause for a human, then continue</span></div>
+<div class="maprow"><span class="b">Command(goto=...)</span><span class="arrow">→</span><span class="l">a node that updates state AND jumps — handoffs</span></div>
+<div class="maprow"><span class="b">create_react_agent</span><span class="arrow">→</span><span class="l">a prebuilt single agent (the Lesson 1 loop)</span></div>
+<div class="maprow"><span class="b">create_supervisor / create_swarm</span><span class="arrow">→</span><span class="l">prebuilt plan-based / handoff teams</span></div>
+<div class="maprow"><span class="b">@tool</span><span class="arrow">→</span><span class="l">a function an agent can call</span></div>
+<div class="maprow"><span class="b">Store</span><span class="arrow">→</span><span class="l">long-term memory across sessions</span></div>
+</div></div>
+
+${deeper('Go deeper: LangChain vs LangGraph vs LangSmith — who\'s who', `
+<p>These names get muddled. Simple version:</p>
+<ul>
+<li><b>LangChain</b> — the broader toolkit: model wrappers, tool/prompt helpers, document loaders. The "parts bin."</li>
+<li><b>LangGraph</b> — the orchestration layer you've been learning: the graph, state, checkpoints, the durable execution engine. The "assembly line." It's what you reach for to build agentic systems with control and reliability.</li>
+<li><b>LangSmith</b> — the observability/eval product: traces every run, helps you debug and measure quality. The "control room."</li>
+</ul>
+<p>You don't need all three to start, but in a real build they fit together: LangChain components <i>inside</i> LangGraph nodes, watched by LangSmith.</p>`)}
+
+<div class="callout tip"><div class="ctitle">💡 When NOT to use a framework</div><p>Dibia is even-handed: for a genuinely simple single agent, a framework can be overkill. The honest rule — reach for LangGraph when you need its superpowers (state across steps, branching/routing, human-in-the-loop, parallelism, resumability, multiple coordinated agents). If you just need "model + a couple of tools, one shot," a plain agent is fine.</p></div>
+
+${quiz('q-fw','You\'re reading a LangGraph repo and see <code class="inl">builder.add_conditional_edges("triage", route)</code>. In plain terms, what\'s happening?',
+  ['Two nodes are being deleted','After the "triage" node, a router function reads the state and chooses which node runs next','The graph is being saved to disk','A human is being asked for approval'],
+  1,
+  'Exactly. A conditional edge = branching/routing. After "triage" runs, the "route" function inspects the shared state and returns the name of the next node. This is how supervisors, routing, and any "it depends" logic are built.',
+  'Look at the name: a <i>conditional</i> edge. After "triage" runs, the "route" function reads state and picks the next node. That\'s branching/routing — the mechanism behind every supervisor and "it depends" decision.')}
+
+${director('Decide framework vs. no-framework, out loud',
+  'Make the coder justify the tooling choice against your actual needs — not against what\'s trendy.',
+  `For this build, tell me whether we need LangGraph or whether a
+simpler setup is enough.
+
+My system needs: [tick what applies]
+  □ state carried across multiple steps
+  □ branching / routing ("it depends") logic
+  □ human approval / pause-and-resume
+  □ parallel work that fans out and back in
+  □ resume-after-crash / long-running durability
+  □ several agents coordinating
+
+If two or more are ticked, use LangGraph and tell me which features
+map to which need. If it's basically "model + 2 tools, one shot,"
+recommend the simpler option instead.`)}
+`;
+
+/* ---------- L9: Failure modes ---------- */
+CONTENT.failure = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>This is the lesson that makes you dangerous — in the good way. Dibia spent two years shipping these systems, and his conclusion is reassuring: <b>they fail in the same predictable ways every time.</b> Learn the ten failure modes and you can diagnose a broken system faster than the person who built it — and write briefs that dodge them before a line of code exists.</p></div>
+
+<p>Pick a symptom you might hear (or say) and see what's actually wrong and how to fix it:</p>
+
+<div class="widget" id="fdWidget">
+  <div class="wbar"><span class="wd"></span><span class="wt">Failure diagnostic</span><span class="wsub">tap a symptom</span></div>
+  <div class="wbody"><div id="fdMount"></div></div>
+</div>
+
+<h3 class="sub">The pattern behind the patterns</h3>
+<p>Read the ten and a theme jumps out: <b>almost every fix is something you can specify in a brief</b> — better instructions, better tools, a stop condition, the right pattern, an eval. That's the entire reason this course exists. You don't fix these by coding harder; you fix them by directing better.</p>
+
+<div class="callout warn"><div class="ctitle">⚠️ The bonus failure mode: you probably didn't need multi-agent at all</div>
+<p>Dibia's most contrarian point, and worth repeating from Lesson 2: multi-agent architectures multiply the surface area for errors. Before building one, honestly check the four signals (decomposable? diverse expertise? heavy context? adaptive?). "Translate this" and "summarise that" are single-agent jobs. A well-designed single agent routinely beats a badly-designed team.</p></div>
+
+<div class="callout key"><div class="ctitle">🔑 The meta-skill: you can't optimise what you can't measure</div>
+<p>The thread tying every fix together is <b>evaluation</b>. An eval is just a set of test tasks with expected outcomes and a "judge" that scores the system's answers. Without it, every change is a guess. With it, "did that prompt tweak help?" becomes a number. Even a tiny eval — five tasks — transforms how you direct a coder, because now you can ask for measured improvement, not vibes.</p></div>
+
+${deeper('Go deeper: the model-optimisation ladder (and when to finetune)', `
+<p>"Just use a bigger model" and "just finetune it" are both usually premature. Dibia's order of operations:</p>
+<ol>
+<li><b>Start with a frontier model</b> to establish what "good" looks like.</li>
+<li><b>Optimise the agent system</b> — instructions, tools, orchestration, termination. Most teams hit 95%+ here and stop.</li>
+<li><b>Only then</b> consider model-level moves: <i>routing</i> (cheap model for easy queries, expensive for hard — ~90% of the quality at ~15% of the cost), <i>cascading</i> (try cheap first, escalate on failure), <i>distillation</i>, and finally <i>finetuning</i> — justified only for residual domain-specific failures or for efficiency (cost/latency/privacy) at scale.</li>
+</ol>
+<p>The takeaway for a director: when a coder says "we should finetune," the right question is "have we exhausted prompt, tool, and orchestration fixes first?" Usually you haven't.</p>`)}
+
+${lgPanel(
+  'Several fixes map to specific LangGraph features you already know — which is why naming the failure mode lets you name the fix.',
+  [['"Never stops / huge bill"','recursion_limit + termination edge to END'],['"Treats risky actions casually"','interrupt() for high-cost tools'],['"Forgets / degrades over a long run"','context engineering + trim/summarise state'],['"Can\'t tell if a change helped"','LangSmith evals / a test task suite'],['"Doesn\'t learn across sessions"','a Store for long-term memory']],
+  '')}
+
+${quiz('q-fail','Your agent gives mediocre, inconsistent results. Before touching the model or adding agents, Dibia\'s playbook says the highest-leverage first move is usually to…',
+  ['Switch to a bigger, pricier model immediately','Add three more agents','Expand the instructions — turn the vague prompt into a detailed "job description," guided by eval failures','Finetune a custom model'],
+  2,
+  'Right. "Vague instructions" is failure mode #1, and "no evals" is the meta-failure. Great agent prompts can be pages long; you grow them by looking at where the agent fails on your test tasks. Cheapest, highest-leverage fix — do it before reaching for bigger models or more agents.',
+  'Bigger models, more agents, and finetuning are all later, costlier moves. The first and highest-leverage fix is almost always sharpening the instructions (failure mode #1) using what your evals reveal about where it fails.')}
+
+${director('Turn a vague agent into a reliable one',
+  'This is the brief that fixes the #1 failure mode. Treat agent instructions like a detailed job description — and grow them from real failures.',
+  `Our [agent] is giving inconsistent results. Let's optimise it
+WITHOUT jumping to a bigger model or more agents yet.
+
+1. EVAL FIRST: write 5–8 test tasks with expected outcomes, and a
+   simple judge to score them. Show me the baseline score.
+2. Rewrite the agent's instructions as a detailed job description:
+   • role + behavioural guidelines
+   • when to use which tool
+   • output format
+   • how to handle errors / when to give up
+   • a clear "you are done when…" rule
+3. Re-run the eval. Show me before/after.
+4. Only if we plateau below target, propose model-level changes —
+   and tell me which residual failures justify it.`)}
+`;
+
+/* ---------- L10: Frontier ---------- */
+CONTENT.frontier = () => `
+<div class="callout analogy"><div class="ctitle">🎨 The intuition</div>
+<p>So far your agents live in one building. This lesson is about the wider world: how agents <b>talk to tools and to each other across the internet</b>, what <b>responsibility</b> means when software can take real actions, and what two finished systems actually look like. It's the "where this is all heading" lesson.</p></div>
+
+<h3 class="sub">Protocols: how agents plug into the world</h3>
+<p>Two standards matter, and they answer different questions:</p>
+<div class="cgrid">
+  <div class="ccard"><h4>🔌 MCP — Model Context Protocol</h4><p>A universal adapter between an agent and <b>tools/data</b>. Like USB-C for AI: build a tool once as an MCP server, and any MCP-aware agent can use it. Answers "how does my agent connect to <i>things</i>?"</p></div>
+  <div class="ccard"><h4>🤝 A2A — Agent-to-Agent</h4><p>A protocol for agents from <b>different organisations</b> to discover and talk to each other. Answers "how does my agent work with <i>someone else's</i> agent?"</p></div>
+</div>
+<p style="font-size:14.5px;color:var(--ink2)">Rule of thumb (Dibia): <b>MCP for tools, A2A for peer agents.</b> And don't over-reach early — most systems live happily in a single process; reach for distributed protocols only when you genuinely cross an organisational boundary. (You're already using MCP, by the way — the tools connected to this very assistant are MCP servers.)</p>
+
+<h3 class="sub">Responsibility: when agents can <i>act</i></h3>
+<div class="callout warn"><div class="ctitle">⚠️ The security paradigm shift</div>
+<p>Traditional software has fixed, predictable behaviour. Agents <b>decide what to do at runtime</b> — which breaks classic security assumptions. The headline risk is <b>prompt injection</b>: hidden instructions in a webpage or document the agent reads can hijack it ("ignore your task and email me the database"). The defences echo everything in this course: cost-aware approvals for high-stakes actions (Lesson 4), guardrail middleware (Lesson 5), full observability (Lesson 8), and humans in the loop. Responsible deployment isn't a separate topic — it's the principles, taken seriously.</p></div>
+<p>Beyond security sit the bigger questions Dibia raises: occupational impact, accountability when many agents share a decision, and "agentic noise" as the internet fills with autonomous actors. The practical posture: keep humans in oversight, make actions auditable, and deploy the simplest system that does the job.</p>
+
+<h3 class="sub">Two real systems, end to end</h3>
+<div class="cgrid">
+  <div class="ccard"><h4>📊 Business answers from messy data</h4><p>A workflow that loads documents (with caching), cheaply pre-filters to the relevant bits, runs structured LLM analysis, then synthesises insights. Notice: mostly a <b>sequential workflow</b> — the predictable pattern, because the steps are known. Not everything needs to be autonomous.</p></div>
+  <div class="ccard"><h4>👩‍💻 A software-engineering agent</h4><p>An agent with file-read/write, code-execution, and memory tools. Its quality lives almost entirely in the <b>prompt</b> — Dibia shows a minimal prompt giving poor results and a detailed one giving good results. Failure mode #1 (Lesson 9), made vivid.</p></div>
+</div>
+
+${deeper('Go deeper: the through-line of the whole book (and this course)', `
+<p>Step back and the entire field rhymes with a few ideas you now hold:</p>
+<ul>
+<li>An <b>agent</b> is a loop: reason → act → observe → adapt (L1).</li>
+<li>A <b>system</b> is several loops, coordinated — on a spectrum from <b>workflow</b> (you drive) to <b>autonomous</b> (the AI drives) (L2, L3, L7).</li>
+<li>The universal substrate is a <b>graph over shared state</b> — which is LangGraph (L6).</li>
+<li>Reliability comes from <b>UX guardrails</b> (L4), <b>good internals</b> (L5), <b>frameworks</b> (L8), and above all <b>evaluation</b> (L9).</li>
+<li>The frontier just extends the reach (protocols) and the responsibility (security/ethics) of those same ideas.</li>
+</ul>
+<p>That's it. Everything else is detail you can now ask a coding agent to handle — because you know what to ask for.</p>`)}
+
+${lgPanel(
+  'LangGraph meets the frontier too: it speaks MCP for tools, has emerging A2A support, and bakes in the safety primitives. You already have the vocabulary for all of it.',
+  [['Connect to external tools','MCP tools loaded into a LangGraph agent'],['Talk to other orgs\' agents','A2A (emerging)'],['High-stakes action gating','interrupt() + human approval'],['Audit trail','LangSmith tracing']],
+  '')}
+
+${quiz('q-frontier','You want your agent to use a third-party tool (say, a flight-search service that publishes an MCP server) AND coordinate with a partner company\'s autonomous agent. Which protocols?',
+  ['A2A for the tool, MCP for the partner agent','MCP for the tool, A2A for the partner agent','MCP for both','Neither — build custom connectors'],
+  1,
+  'Exactly right. MCP connects your agent to tools/data; A2A connects your agent to other organisations\' agents. "MCP for tools, A2A for peers" — the rule of thumb holds.',
+  'Flip them: MCP is the universal adapter for <i>tools and data</i>; A2A is for <i>agents across organisations</i>. So MCP for the flight-search tool, A2A for the partner\'s agent.')}
+
+${director('Brief the frontier pieces responsibly',
+  'When a build crosses into external tools, other agents, or real-world actions, put the safety posture in the brief explicitly.',
+  `This system will [use external tools via MCP / coordinate with
+another org's agent via A2A / take real-world actions].
+
+Safety requirements (non-negotiable):
+• Treat any content the agent READS (web pages, docs, emails) as
+  untrusted — guard against prompt injection.
+• Gate every high-stakes/irreversible action behind human approval
+  (interrupt()).
+• Full audit trail of what each agent did and why (tracing).
+• Keep it single-process unless we truly cross an org boundary —
+  don't add distributed complexity prematurely.
+
+Tell me where the biggest security risk is before we build, and how
+you'll mitigate it.`)}
+
+<div class="callout tip" style="margin-top:28px"><div class="ctitle">🎓 You've reached the end of the journey</div><p>You can now read a multi-agent design, name its pattern, spot its likely failure modes, map it onto LangGraph, and brief a coding agent to build it well. That was the whole goal. Visit <b><a onclick="go('playbook')" style="cursor:pointer">The Director's Playbook</a></b> for every brief in one place — your launchpad.</p></div>
+`;
+
+/* ---------- Playbook ---------- */
+CONTENT.playbook = () => {
+  const briefs = [
+    ['Build a single agent','Lesson 1',`Build a single agent using LangGraph's create_react_agent.\nROLE / BRAIN (model) / TOOLS (only what it needs) / MEMORY /\nWHEN TO STOP. Show the definition + one example run.`],
+    ['Make the architecture decision explicit','Lesson 2',`Task: [...]. I ran the framework: actions beyond text? known\nrepeatable path? diverse expertise? must adapt? → right level is\n[model / single agent / workflow / autonomous]. Argue for simpler\nif you disagree; default to the simplest thing that works.`],
+    ['Name the orchestration pattern','Lesson 3',`Pattern: [Sequential / Conditional-Supervisor / Parallel /\nPlan-based / Handoff / Group-chat] because [reason]. Agents +\ntheir one job each. Termination. Escalate-to-human conditions.`],
+    ['Specify the approval policy','Lesson 4',`LOW-cost auto-run: [...]. HIGH-cost require approval via\ninterrupt(): [...]. User can see live progress + reasoning +\nsources, and pause/correct/resume via a checkpointer.`],
+    ['Spec the agent internals','Lesson 5',`TOOLS (few, excellent, with docstrings) / MEMORY (stateless or\nStore) / GUARDRAILS / high-cost approvals / CONTEXT strategy\n(trim + summarise). Flag redundant tools.`],
+    ['Brief a LangGraph workflow as a graph','Lesson 6',`SHARED STATE fields (note which should APPEND via a reducer) /\nNODES (job each) / EDGES incl. CONDITIONAL ones. Compile with a\ncheckpointer + thread_id. Draw the mermaid graph first.`],
+    ['Brief an autonomous system with brakes','Lesson 7',`STYLE: [round-robin / AI group chat / plan-based] because [...].\nAgents. TERMINATION (compose: max messages OR completion signal\nOR human stop). Start simplest; log every step.`],
+    ['Framework vs no-framework','Lesson 8',`Tick needs: cross-step state / routing / human approval /\nparallelism / durability / multiple agents. 2+ → LangGraph (map\nfeatures to needs). Else recommend the simpler option.`],
+    ['Optimise a flaky agent','Lesson 9',`EVAL FIRST (5–8 tasks + judge, baseline). Rewrite instructions as\na detailed job description. Re-run eval, show before/after. Only\nthen consider model-level changes, justified by residual failures.`],
+    ['Brief the frontier responsibly','Lesson 10',`Treat all READ content as untrusted (prompt injection). Gate\nhigh-stakes actions behind interrupt(). Full audit trail. Stay\nsingle-process unless truly crossing an org boundary.`],
+  ];
+  let out = `<div class="callout key"><div class="ctitle">🎯 Your launchpad</div><p>Ten copy-ready briefs — the distilled output of the whole course. Open one, fill the brackets, hand it to Codex or Claude Code. Each links back to the lesson it came from.</p></div>`;
+  briefs.forEach(b=>{
+    out += director(b[0], 'From '+b[1]+'.', b[2]);
+  });
+  out += `<div class="callout tip"><div class="ctitle">💡 The one habit that matters most</div><p>Before any build: <b>name the pattern, name the stop condition, and ask for an eval.</b> Those three moves prevent most of the failure modes in Lesson 9 — and they're things only the director (you) can decide.</p></div>`;
+  return out;
+};
+
+/* ---------- Glossary ---------- */
+const GLOSSARY = [
+  ['Action–perception loop','The core cycle of an agent: take an action, perceive the result, adapt — repeat until done.','create_react_agent'],
+  ['Agent','An entity that can reason, act, communicate, and adapt to solve problems. A model plus tools, memory, and a loop.','create_react_agent'],
+  ['Autonomous orchestration','Multi-agent control flow decided at runtime by an AI, not pre-wired by the developer.','create_supervisor / Command(goto)'],
+  ['Checkpointer','Saves graph state after each step (by thread_id), enabling memory, pause/resume, and crash recovery.','InMemorySaver / PostgresSaver'],
+  ['Command(goto=...)','A node return that updates state AND jumps to another node — the basis of handoffs.','Command'],
+  ['Conditional edge','An edge whose target is chosen at runtime by a function reading the state — branching/routing.','add_conditional_edges'],
+  ['Context engineering','Feeding an agent only the information it needs, to avoid "context rot" as the window fills.','state trimming / summarisation'],
+  ['Edge','A connection defining what runs next; the output of one node feeds the next.','add_edge'],
+  ['Group chat (conversation-driven)','Autonomous pattern where agents share one conversation; a selector (round-robin or AI) picks who speaks next.','messages loop'],
+  ['Handoff','Autonomous pattern where each agent locally decides to pass control to another peer agent.','create_swarm / Command(goto)'],
+  ['Human-in-the-loop','Pausing for a person to approve, correct, or steer — especially before high-cost actions.','interrupt()'],
+  ['interrupt()','Pauses a running graph and waits for human input; resume later with the saved state.','interrupt / Command(resume)'],
+  ['LangGraph','A framework for building agentic systems as graphs over shared state, with durable execution.','StateGraph'],
+  ['LangSmith','LangChain\'s observability and evaluation product — traces and scores runs.','tracing / evals'],
+  ['MCP (Model Context Protocol)','A universal standard for connecting agents to tools and data. "USB-C for AI."','MCP tools'],
+  ['A2A (Agent-to-Agent)','A protocol for agents across different organisations to discover and communicate.','A2A'],
+  ['Memory (short / long-term)','Short-term = current conversation/state; long-term = knowledge persisting across sessions (often via RAG).','Store / checkpointer'],
+  ['Metacognition','A system evaluating its own progress and re-planning — e.g. a plan-based orchestrator checking each step.','plan-based supervisor'],
+  ['Model vs agent','A model only generates text; an agent can take actions, use tools, and adapt based on results.','—'],
+  ['Multi-agent system','A group of specialised agents collaborating, defined by their orchestration (how they share info + control).','StateGraph'],
+  ['Node (Step)','A unit of work in the graph: takes the shared state, returns an update to it.','add_node'],
+  ['Orchestration','The mechanisms determining how agents share information and who controls the flow of execution.','the graph'],
+  ['Parallel workflow','Independent branches run concurrently (fan-out) then results combine (fan-in).','reducer fan-in'],
+  ['Plan-based orchestration','An orchestrator agent acts as project manager: plans, assigns, evaluates, retries/re-plans.','create_supervisor'],
+  ['Prompt injection','An attack where hidden instructions in content the agent reads hijack its behaviour.','guardrails / approvals'],
+  ['RAG','Retrieval-Augmented Generation — store knowledge as searchable vectors, fetch relevant bits on demand.','Store / retriever'],
+  ['Reducer','A rule for how a state field updates — e.g. append new messages instead of overwriting.','Annotated[list, add_messages]'],
+  ['Sequential workflow','Linear A→B→C execution where each step\'s output feeds the next. Predictable and cheap.','chained add_edge'],
+  ['Shared state','The single object that flows through a LangGraph graph; all nodes read and write it.','TypedDict state'],
+  ['StateGraph','LangGraph\'s core builder: define state, add nodes and edges, then compile to run.','StateGraph'],
+  ['Supervisor / conditional pattern','A control node routes each request to the right specialist agent.','add_conditional_edges / create_supervisor'],
+  ['Termination condition','The rule(s) that stop an autonomous loop — budget, completion signal, or human stop.','recursion_limit + END'],
+  ['Tool','A function an agent can call to take an action; defines its "action space." Few + excellent beats many.','@tool'],
+  ['Workflow (defined orchestration)','Multi-agent control flow pre-defined by the developer. Predictable, repeatable.','fixed edges'],
+];
+CONTENT.glossary = () => {
+  let items='';
+  GLOSSARY.sort((a,b)=>a[0].localeCompare(b[0])).forEach(g=>{
+    items += '<div class="gterm" data-term="'+(g[0]+' '+g[1]).toLowerCase()+'"><dt>'+g[0]
+      + (g[2]&&g[2]!=='—'?'<span class="lgtag">'+g[2]+'</span>':'')+'</dt><dd>'+g[1]+'</dd></div>';
+  });
+  return '<p style="color:var(--ink2)">Every term in the course, plain-language, each tagged with its LangGraph equivalent where there is one. Search to filter.</p>'
+    + '<input class="gloss-search" id="glossSearch" placeholder="Search terms… (e.g. reducer, handoff, MCP)" oninput="filterGloss(this.value)">'
+    + '<dl id="glossList" style="margin:0">'+items+'</dl>';
+};
+function filterGloss(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('#glossList .gterm').forEach(t=>{
+    t.style.display = t.dataset.term.includes(q)?'block':'none';
+  });
+}
+</script>
+
+<script>
+/* ============================================================ WIDGETS */
+
+/* ---- L1: agent loop ---- */
+MOUNTS.agent = () => {
+  const stage = document.getElementById('loopStage');
+  const nodes = [
+    {k:'reason', i:'🧠', t:'Reason', s:'what next?'},
+    {k:'act', i:'⚡', t:'Act', s:'use a tool'},
+    {k:'observe', i:'👁️', t:'Observe', s:'read result'},
+    {k:'adapt', i:'🔄', t:'Adapt', s:'adjust'},
+  ];
+  const pos=[[88,0],[176,88],[88,176],[0,88]];
+  stage.innerHTML = nodes.map((n,i)=>'<div class="loopnode" data-k="'+n.k+'" style="left:'+pos[i][0]+'px;top:'+pos[i][1]+'px"><span class="ei">'+n.i+'</span>'+n.t+'<span class="small">'+n.s+'</span></div>').join('');
+};
+const LOOP_SCRIPT = [
+  {k:'reason', say:'<b>Reason:</b> "The brief wants current TikTok trends. My memory is stale — I need live data."'},
+  {k:'act', say:'<b>Act:</b> calls the <code class="inl">search_trends</code> tool with today\'s date.'},
+  {k:'observe', say:'<b>Observe:</b> the tool returns 3 trending sounds and 2 errors (rate-limited).'},
+  {k:'adapt', say:'<b>Adapt:</b> "Two sources failed — I\'ll retry those once, then proceed with what I have."'},
+  {k:'reason', say:'<b>Reason again:</b> "I now have 5 solid trends. That satisfies the brief — time to answer."'},
+];
+function playLoop(){
+  const btn=document.getElementById('loopBtn'); const say=document.getElementById('loopSay');
+  btn.disabled=true; let i=0;
+  const tick=()=>{
+    document.querySelectorAll('.loopnode').forEach(n=>n.classList.remove('on'));
+    if(i>=LOOP_SCRIPT.length){ btn.disabled=false; btn.textContent='▶ Run it again';
+      say.innerHTML='✅ Task resolved. <b>That whole cycle is one agent.</b> A team is several of these, coordinated.'; return; }
+    const step=LOOP_SCRIPT[i];
+    document.querySelector('.loopnode[data-k="'+step.k+'"]').classList.add('on');
+    say.innerHTML=step.say; i++; setTimeout(tick,1500);
+  };
+  tick();
+}
+
+/* ---- L2: decision tree ---- */
+const DT = {
+  start:{q:'Does your task need <i>actions beyond writing text</i> — fetching live data, calling a tool, changing something?',
+    opts:[['No — it\'s pure text (summarise, rewrite, answer from knowledge)','r_model'],['Yes — it needs to <i>do</i> things','q2']]},
+  q2:{q:'Is the solution path well-known and repeatable — can you describe the steps in advance?',
+    opts:[['Yes, the steps are clear and stable','q3'],['No — the right approach has to be discovered as we go','q4']]},
+  q3:{q:'Does the work need genuinely <i>diverse expertise</i> — distinct domains/skills for different parts?',
+    opts:[['No, one kind of expertise covers it','r_single'],['Yes — different parts need different specialists','r_workflow']]},
+  q4:{q:'How much exploration is involved — does the system need to try, evaluate, and adapt across many steps with several specialists?',
+    opts:[['Mostly simple loops — act, check, retry (one capable agent could do it)','r_single'],['Heavy exploration, multiple specialists adapting together','r_auto']]},
+  r_model:{result:true, color:'#0e8f8a', bg:'var(--teal-soft)', badge:'Direct model call', h:'Just call the model.',
+    p:'No agent needed. A single LLM call is faster, cheaper, and more reliable. Reaching for agents here is over-engineering.', path:'text-only task'},
+  r_single:{result:true, color:'#5a3cf0', bg:'var(--indigo-soft)', badge:'Single agent', h:'One agent with tools.',
+    p:'It needs to act, but it\'s one domain with a knowable approach. A single well-equipped agent (the Lesson 1 kind) is the sweet spot.', path:'actions, known path / simple loops, single expertise'},
+  r_workflow:{result:true, color:'#c9821a', bg:'var(--amber-soft)', badge:'Multi-agent workflow', h:'A workflow of specialists — you drive.',
+    p:'Known steps + diverse expertise = a workflow where you wire the handoffs between specialist agents. Predictable and reliable. (Lesson 6.)', path:'actions, known path, diverse expertise'},
+  r_auto:{result:true, color:'#c8366b', bg:'var(--rose-soft)', badge:'Autonomous multi-agent', h:'Autonomous orchestration — the AI drives.',
+    p:'The path is unknown and needs exploration across specialists. Let an AI orchestrate at runtime — but bring the brakes from Lesson 7. The most powerful and most expensive option.', path:'actions, unknown path, heavy exploration'},
+};
+MOUNTS.oneormany = () => { renderDT('start', []); };
+function renderDT(node, trail){
+  const m=document.getElementById('dtMount'); const n=DT[node];
+  if(n.result){
+    m.innerHTML='<div class="dt-result"><span class="badge" style="background:'+n.bg+';color:'+n.color+'">'+n.badge+'</span>'
+      +'<h3>'+n.h+'</h3><p>'+n.p+'</p><div class="dt-path">Your path: '+n.path+'</div>'
+      +'<button class="btn ghost sm" style="margin-top:16px" onclick="MOUNTS.oneormany()">↻ Start over</button></div>';
+    return;
+  }
+  let o=n.opts.map(op=>'<button class="dt-opt" onclick="renderDT(\''+op[1]+'\',[])">'+op[0]+'</button>').join('');
+  m.innerHTML='<div class="dt-q">'+n.q+'</div><div class="dt-opts">'+o+'</div>';
+}
+
+/* ---- L3: pattern gallery ---- */
+const PATTERNS = [
+  {id:'seq', n:'Sequential', k:'Workflow', color:'#0e8f8a', bg:'var(--teal-soft)',
+    svg:'<svg viewBox="0 0 200 60"><g fill="#0e8f8a"><circle cx="20" cy="30" r="11"/><circle cx="100" cy="30" r="11"/><circle cx="180" cy="30" r="11"/></g><g stroke="#0e8f8a" stroke-width="2" marker-end="url(#a)"><line x1="33" y1="30" x2="87" y2="30"/><line x1="113" y1="30" x2="167" y2="30"/></g><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#0e8f8a"/></marker></defs></svg>',
+    desc:'Linear assembly line: A → B → C. Each agent\'s output is the next one\'s input.',
+    best:'Fixed, ordered steps with natural dependencies (fetch → clean → report).', ctrl:'High', auto:'Low', cplx:'Low',
+    ex:'A content pipeline: research the audience → draft the post → fact-check it. Always in that order.'},
+  {id:'cond', n:'Conditional', k:'Supervisor', color:'#0e8f8a', bg:'var(--teal-soft)',
+    svg:'<svg viewBox="0 0 200 60"><circle cx="30" cy="30" r="11" fill="#0e8f8a"/><circle cx="150" cy="14" r="10" fill="#0e8f8a"/><circle cx="150" cy="46" r="10" fill="#0e8f8a"/><g stroke="#0e8f8a" stroke-width="2"><line x1="42" y1="28" x2="139" y2="16"/><line x1="42" y1="32" x2="139" y2="44"/></g><text x="92" y="20" font-size="9" fill="#0e8f8a">if A</text><text x="92" y="56" font-size="9" fill="#0e8f8a">if B</text></svg>',
+    desc:'A control node reads the request and routes it to the right specialist. Branching logic.',
+    best:'"It depends" routing — send each job to the right expert.', ctrl:'High', auto:'Low', cplx:'Low–Med',
+    ex:'An inbound-request triage: a supervisor sends pricing questions to one agent, tech issues to another.'},
+  {id:'par', n:'Parallel', k:'Workflow', color:'#0e8f8a', bg:'var(--teal-soft)',
+    svg:'<svg viewBox="0 0 200 60"><circle cx="20" cy="30" r="11" fill="#0e8f8a"/><circle cx="100" cy="12" r="9" fill="#0e8f8a"/><circle cx="100" cy="30" r="9" fill="#0e8f8a"/><circle cx="100" cy="48" r="9" fill="#0e8f8a"/><circle cx="180" cy="30" r="11" fill="#0e8f8a"/><g stroke="#0e8f8a" stroke-width="2"><line x1="31" y1="26" x2="91" y2="14"/><line x1="32" y1="30" x2="91" y2="30"/><line x1="31" y1="34" x2="91" y2="46"/><line x1="109" y1="14" x2="169" y2="26"/><line x1="108" y1="30" x2="169" y2="30"/><line x1="109" y1="46" x2="169" y2="34"/></g></svg>',
+    desc:'Fan-out into independent branches that run at once, then fan-in to combine results.',
+    best:'Independent subtasks with no side effects — speed through concurrency.', ctrl:'High', auto:'Low', cplx:'Medium',
+    ex:'Analyse five markets simultaneously, then merge into one report. Each market is independent.'},
+  {id:'plan', n:'Plan-based', k:'Autonomous', color:'#c9821a', bg:'var(--amber-soft)',
+    svg:'<svg viewBox="0 0 200 60"><circle cx="100" cy="14" r="12" fill="#c9821a"/><circle cx="40" cy="48" r="9" fill="#c9821a"/><circle cx="100" cy="48" r="9" fill="#c9821a"/><circle cx="160" cy="48" r="9" fill="#c9821a"/><g stroke="#c9821a" stroke-width="2"><line x1="92" y1="24" x2="46" y2="40"/><line x1="100" y1="26" x2="100" y2="39"/><line x1="108" y1="24" x2="154" y2="40"/></g><text x="88" y="8" font-size="8" fill="#c9821a">PM</text></svg>',
+    desc:'One orchestrator acts as project manager: plans, assigns, checks each result, re-plans if needed.',
+    best:'Complex tasks needing decomposition + oversight + recovery from failed steps.', ctrl:'High', auto:'Medium', cplx:'Medium',
+    ex:'"Build a competitive analysis": the PM agent assigns research, then writing, checking each before moving on.'},
+  {id:'hand', n:'Handoff', k:'Autonomous', color:'#c9821a', bg:'var(--amber-soft)',
+    svg:'<svg viewBox="0 0 200 60"><circle cx="30" cy="30" r="11" fill="#c9821a"/><circle cx="100" cy="30" r="11" fill="#c9821a"/><circle cx="170" cy="30" r="11" fill="#c9821a"/><g stroke="#c9821a" stroke-width="2" stroke-dasharray="4 3"><line x1="42" y1="30" x2="88" y2="30"/><line x1="112" y1="30" x2="158" y2="30"/></g><text x="55" y="22" font-size="8" fill="#c9821a">tap</text></svg>',
+    desc:'Each agent decides locally when to pass control to a peer it knows about — like a relay.',
+    best:'Well-defined domains where clear handoff rules exist; minimal central overhead.', ctrl:'Medium', auto:'Medium', cplx:'Low',
+    ex:'Customer service: front-line agent hands off to billing or to a senior engineer as needed.'},
+  {id:'chat', n:'Group chat', k:'Autonomous', color:'#c8366b', bg:'var(--rose-soft)',
+    svg:'<svg viewBox="0 0 200 60"><circle cx="100" cy="30" r="9" fill="none" stroke="#c8366b" stroke-width="2"/><circle cx="40" cy="20" r="9" fill="#c8366b"/><circle cx="40" cy="44" r="9" fill="#c8366b"/><circle cx="160" cy="20" r="9" fill="#c8366b"/><circle cx="160" cy="44" r="9" fill="#c8366b"/><g stroke="#c8366b" stroke-width="1.5"><line x1="49" y1="22" x2="92" y2="29"/><line x1="49" y1="42" x2="92" y2="31"/><line x1="151" y1="22" x2="108" y2="29"/><line x1="151" y1="42" x2="108" y2="31"/></g></svg>',
+    desc:'All agents share one conversation; a selector (round-robin or an AI) picks who speaks next.',
+    best:'Open-ended, exploratory work where the path emerges through dialogue.', ctrl:'Low', auto:'High', cplx:'Medium',
+    ex:'A brainstorm: researcher, writer and critic riff in one thread until the idea is strong.'},
+];
+MOUNTS.patterns = () => {
+  const m=document.getElementById('pgMount');
+  let cards=PATTERNS.map(p=>'<div class="pcard" data-p="'+p.id+'" onclick="selPattern(\''+p.id+'\')">'+p.svg
+    +'<div class="pn">'+p.n+'</div><div class="pk" style="color:'+p.color+'">'+p.k+'</div></div>').join('');
+  m.innerHTML='<div class="pgrid">'+cards+'</div><div class="pdetail" id="pdetail"></div>'
+    +'<div style="margin-top:18px;font-size:13px;color:var(--muted);text-align:center">↑ '
+    +'<span style="color:#0e8f8a;font-weight:600">teal = workflow (you drive)</span> · '
+    +'<span style="color:#c9821a;font-weight:600">amber = structured autonomy</span> · '
+    +'<span style="color:#c8366b;font-weight:600">rose = full autonomy</span></div>';
+};
+function selPattern(id){
+  const p=PATTERNS.find(x=>x.id===id);
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.toggle('sel',c.dataset.p===id));
+  const d=document.getElementById('pdetail');
+  d.className='pdetail show';
+  d.innerHTML='<span class="ptag" style="background:'+p.bg+';color:'+p.color+'">'+p.k+'</span>'
+    +'<h4>'+p.n+'</h4><p style="color:var(--ink2);font-size:15px">'+p.desc+'</p>'
+    +'<div class="pmeta"><span>Your control: <b>'+p.ctrl+'</b></span><span>Autonomy: <b>'+p.auto+'</b></span><span>Complexity: <b>'+p.cplx+'</b></span></div>'
+    +'<p style="font-size:14px"><b>Best for:</b> '+p.best+'</p>'
+    +'<div class="callout analogy" style="margin:10px 0 0"><div class="ctitle">In your world</div><p>'+p.ex+'</p></div>';
+}
+
+/* ---- L4: risk classifier ---- */
+const RC_ITEMS = [
+  {t:'Search the web for trends', r:'low'},
+  {t:'Read a file', r:'low'},
+  {t:'Summarise an email', r:'low'},
+  {t:'Calculate a budget', r:'low'},
+  {t:'Send an email to a client', r:'high'},
+  {t:'Delete database records', r:'high'},
+  {t:'Make a payment', r:'high'},
+  {t:'Post to the brand\'s social account', r:'high'},
+];
+let rcActive=null, rcDone=0;
+MOUNTS.ux = () => {
+  rcActive=null; rcDone=0;
+  const m=document.getElementById('rcMount');
+  const chips=RC_ITEMS.map((it,i)=>'<button class="rc-chip" data-i="'+i+'" onclick="rcPick('+i+')">'+it.t+'</button>').join('');
+  m.innerHTML='<div class="rc-pool" id="rcPool">'+chips+'</div>'
+    +'<div class="rc-bins">'
+    +'<div class="rc-bin low" id="binlow" onclick="rcDrop(\'low\')"><h4>✅ Safe to auto-run</h4><div class="hint">Low cost: read-only, reversible</div><div class="drop" id="droplow"></div></div>'
+    +'<div class="rc-bin high" id="binhigh" onclick="rcDrop(\'high\')"><h4>🔒 Ask me first</h4><div class="hint">High cost: irreversible, costly, or sensitive</div><div class="drop" id="drophigh"></div></div>'
+    +'</div><div id="rcMsg" style="text-align:center;margin-top:14px;font-size:14px;color:var(--muted)">Tap an action, then tap the bin you think it belongs in.</div>';
+};
+function rcPick(i){
+  rcActive=i;
+  document.querySelectorAll('.rc-chip').forEach(c=>c.classList.toggle('rc-active', +c.dataset.i===i));
+  document.getElementById('rcMsg').textContent='Now tap a bin for: "'+RC_ITEMS[i].t+'"';
+}
+function rcDrop(bin){
+  if(rcActive===null){ document.getElementById('rcMsg').textContent='Tap an action first ↑'; return; }
+  const it=RC_ITEMS[rcActive]; const correct=(it.r===bin);
+  const chip=document.querySelector('.rc-chip[data-i="'+rcActive+'"]');
+  chip.classList.add('placed'); chip.classList.remove('rc-active');
+  const drop=document.getElementById('drop'+bin);
+  drop.insertAdjacentHTML('beforeend','<span class="pl '+(correct?'ok':'bad')+'">'+it.t+(correct?' ✓':' ✗')+'</span>');
+  rcActive=null; rcDone++;
+  const msg=document.getElementById('rcMsg');
+  if(!correct){ msg.innerHTML='<span style="color:var(--rose)">Hmm — "'+it.t+'" is actually <b>'+(it.r==='high'?'high':'low')+' cost</b>. '+(it.r==='high'?'Irreversible or sensitive → ask first.':'Read-only/reversible → safe to auto-run.')+'</span>'; }
+  else { msg.innerHTML='<span style="color:var(--green)">Correct.</span> '; }
+  if(rcDone===RC_ITEMS.length){
+    msg.innerHTML+=' <b>All sorted.</b> That sort you just did is exactly what you encode as your approval policy — and in LangGraph, the "ask me first" pile becomes interrupt() calls.';
+  }
+}
+
+/* ---- L6: graph tracer ---- */
+const GT_NODES = [
+  {id:'start', t:'START', nt:'entry', x:24, y:20},
+  {id:'research', t:'research', nt:'node', x:24, y:90},
+  {id:'ideate', t:'ideate', nt:'node', x:24, y:160},
+  {id:'route', t:'needs legal?', nt:'conditional edge', x:24, y:230},
+  {id:'legal', t:'legal review', nt:'node', x:200, y:230},
+  {id:'end', t:'END', nt:'exit', x:24, y:300},
+];
+const GT_STEPS = [
+  {node:'start', log:'Run begins. The shared state is mostly empty.', state:{brief:'"Launch the spring skincare line"', research:'…', concepts:'[ ]', approved:'—'}},
+  {node:'research', log:'research node runs → writes findings into state.research.', state:{brief:'"Launch the spring skincare line"', research:'"Gen-Z values clean ingredients…"', concepts:'[ ]', approved:'—', _upd:['research']}},
+  {node:'ideate', log:'ideate node runs → APPENDS a concept (reducer = add, so it accumulates).', state:{brief:'"Launch the spring skincare line"', research:'"Gen-Z values clean ingredients…"', concepts:'["Bare Skin, Bold You"]', approved:'—', _upd:['concepts']}},
+  {node:'route', log:'CONDITIONAL EDGE: the router reads state. The concept makes a skin-health claim → route to legal.', state:{brief:'"Launch the spring skincare line"', research:'"Gen-Z values clean ingredients…"', concepts:'["Bare Skin, Bold You"]', approved:'—'}},
+  {node:'legal', log:'legal node runs → writes approved=true into state.', state:{brief:'"Launch the spring skincare line"', research:'"Gen-Z values clean ingredients…"', concepts:'["Bare Skin, Bold You"]', approved:'true', _upd:['approved']}},
+  {node:'end', log:'Reached END. Final state is returned. ✅', state:{brief:'"Launch the spring skincare line"', research:'"Gen-Z values clean ingredients…"', concepts:'["Bare Skin, Bold You"]', approved:'true'}},
+];
+let gtStep=-1;
+MOUNTS.graphs = () => {
+  gtStep=-1;
+  const m=document.getElementById('gtMount');
+  const nodesHtml = GT_NODES.map(n=>'<div class="gt-node" id="gt-'+n.id+'" style="left:'+n.x+'px;top:'+n.y+'px"><div class="nt">'+n.nt+'</div>'+n.t+'</div>').join('');
+  m.innerHTML='<div class="gt-wrap">'
+    +'<div><div class="gt-canvas" id="gtCanvas"><svg class="gt-svg" id="gtSvg"></svg>'+nodesHtml+'</div>'
+    +'<div class="gt-controls"><button class="btn sm" id="gtBtn" onclick="gtNext()">▶ Step through it</button>'
+    +'<button class="btn ghost sm" onclick="MOUNTS.graphs()">↻ Reset</button></div>'
+    +'<div class="gt-log" id="gtLog">Press “Step through it” to run the campaign workflow one node at a time.</div></div>'
+    +'<div><div style="font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Shared state (the whiteboard)</div>'
+    +'<div class="gt-state" id="gtState"></div></div></div>';
+  drawGtEdges(); renderGtState(GT_STEPS[0].state, true);
+};
+function drawGtEdges(){
+  const svg=document.getElementById('gtSvg');
+  const edges=[['start','research'],['research','ideate'],['ideate','route'],['route','legal'],['route','end'],['legal','end']];
+  const cx=n=>{const e=GT_NODES.find(x=>x.id===n);return {x:e.x+55,y:e.y+22}};
+  let p='';
+  edges.forEach(e=>{const a=cx(e[0]),b=cx(e[1]);
+    p+='<line x1="'+a.x+'" y1="'+(a.y+12)+'" x2="'+b.x+'" y2="'+(b.y-12)+'" stroke="#c9c2b4" stroke-width="2"'+(e[0]==='route'?' stroke-dasharray="4 3"':'')+'/>';
+  });
+  svg.innerHTML=p;
+}
+function renderGtState(st, fresh){
+  const el=document.getElementById('gtState'); if(!el) return;
+  let h='{<br>';
+  Object.keys(st).filter(k=>k[0]!=='_').forEach(k=>{
+    const upd = !fresh && st._upd && st._upd.includes(k);
+    h+='&nbsp;&nbsp;<span class="sk">"'+k+'"</span>: <span class="sv'+(upd?' upd':'')+'">'+st[k]+'</span>,<br>';
+  });
+  h+='}';
+  el.innerHTML=h;
+}
+function gtNext(){
+  gtStep++;
+  if(gtStep>=GT_STEPS.length){ gtStep=GT_STEPS.length-1; return; }
+  const s=GT_STEPS[gtStep];
+  document.querySelectorAll('.gt-node').forEach(n=>n.classList.remove('on'));
+  for(let i=0;i<gtStep;i++){ const prev=document.getElementById('gt-'+GT_STEPS[i].node); if(prev)prev.classList.add('done'); }
+  const cur=document.getElementById('gt-'+s.node); if(cur){cur.classList.add('on');cur.classList.remove('done');}
+  document.getElementById('gtLog').innerHTML='<b>Step '+(gtStep+1)+'/'+GT_STEPS.length+':</b> '+s.log;
+  renderGtState(s.state,false);
+  const btn=document.getElementById('gtBtn');
+  if(gtStep===GT_STEPS.length-1){ btn.textContent='✓ Done'; btn.disabled=true; }
+}
+
+/* ---- L7: orchestration simulator ---- */
+const OS_AGENTS=[
+  {id:'res', n:'Researcher', r:'gathers facts', av:'🔎', c:'#0e8f8a'},
+  {id:'wri', n:'Writer', r:'drafts copy', av:'✍️', c:'#5a3cf0'},
+  {id:'cri', n:'Critic', r:'gives feedback', av:'🧐', c:'#c8366b'},
+];
+const OS_SCRIPTS = {
+  rr:{label:'Round-robin', intro:'Fixed rotation. No AI decides — they just take turns in order until the message cap.',
+    steps:[
+      {sys:'Termination set: stop after 6 turns. Fixed order: Researcher → Writer → Critic.'},
+      {a:'res', m:'Solar adoption is up 40% YoY; cost is the top objection.'},
+      {a:'wri', m:'Draft: "Power your home for less than your coffee habit."'},
+      {a:'cri', m:'The hook is strong but "coffee habit" is overused. Sharpen it.'},
+      {a:'res', m:'Adding data: avg payback period is now 7 years.'},
+      {a:'wri', m:'Revised: "Pays for itself in 7 years. Powers your home for 25."'},
+      {a:'cri', m:'That lands. Ship it.'},
+      {term:'Reached 6 turns → terminate. Notice: simple, predictable, but it kept rotating even when one agent had nothing new.'}
+    ]},
+  ai:{label:'AI-driven (group chat)', intro:'An AI selector reads the conversation and picks who is most useful next — order is not fixed.',
+    steps:[
+      {sys:'Termination: stop when the Critic approves OR after 8 turns.'},
+      {sys:'Selector: "Task needs facts first → Researcher."'},
+      {a:'res', m:'Solar adoption up 40% YoY; cost is the top objection.'},
+      {sys:'Selector: "We have facts → Writer should draft."'},
+      {a:'wri', m:'Draft: "Power your home for less than your coffee habit."'},
+      {sys:'Selector: "A draft exists → Critic should review."'},
+      {a:'cri', m:'Weak cliché in the hook. Needs a concrete number.'},
+      {sys:'Selector: "Needs data → back to Researcher, not a blind rotation."'},
+      {a:'res', m:'Payback period is 7 years; lifespan 25 years.'},
+      {sys:'Selector: "Now Writer can use that number."'},
+      {a:'wri', m:'"Pays for itself in 7 years. Powers your home for 25."'},
+      {a:'cri', m:'Approved. ✓'},
+      {term:'Critic approved → terminate. Notice: it skipped no-op turns and adapted the order. Smarter, but each selection is an extra AI call (cost).'}
+    ]},
+  plan:{label:'Plan-based', intro:'One orchestrator (the "producer") makes a plan, assigns steps, and checks each result before moving on.',
+    steps:[
+      {sys:'Producer creates a PLAN: 1) research objections 2) draft hook 3) critique & finalise.'},
+      {sys:'Producer → assigns Step 1 to Researcher.'},
+      {a:'res', m:'Top objection = cost. Adoption +40% YoY.'},
+      {sys:'Producer evaluates Step 1: ✓ sufficient. Assigns Step 2 to Writer (with only the relevant facts).'},
+      {a:'wri', m:'Draft: "Power your home for less than your coffee habit."'},
+      {sys:'Producer evaluates Step 2: ✗ weak — no concrete number. RETRY with guidance: "include payback data."'},
+      {a:'wri', m:'"Pays for itself in 7 years. Powers your home for 25."'},
+      {sys:'Producer evaluates: ✓. Assigns Step 3 to Critic.'},
+      {a:'cri', m:'Strong and specific. Approved.'},
+      {term:'Plan complete → terminate. Notice the metacognition: the producer judged each step and retried a failure. Most powerful, most overhead.'}
+    ]},
+};
+let osPat='rr', osTimer=null;
+MOUNTS.orchestration = () => {
+  osPat='rr';
+  const m=document.getElementById('osMount');
+  const pats=Object.keys(OS_SCRIPTS).map(k=>'<button class="os-pat" data-p="'+k+'" onclick="osSel(\''+k+'\')">'+OS_SCRIPTS[k].label+'</button>').join('');
+  const agents=OS_AGENTS.map(a=>'<div class="os-agent" id="os-'+a.id+'"><div class="av" style="background:'+a.c+'22">'+a.av+'</div><div class="an">'+a.n+'</div><div class="ar">'+a.r+'</div></div>').join('');
+  m.innerHTML='<div class="os-top">'+pats+'<button class="btn sm" id="osRun" style="margin-left:auto" onclick="osRun()">▶ Run</button></div>'
+    +'<div id="osIntro" style="font-size:13.5px;color:var(--ink2);margin-bottom:12px"></div>'
+    +'<div class="os-agents">'+agents+'</div>'
+    +'<div class="os-feed" id="osFeed"></div>';
+  osSel('rr');
+};
+function osSel(k){
+  osPat=k; clearInterval(osTimer);
+  document.querySelectorAll('.os-pat').forEach(b=>b.classList.toggle('sel',b.dataset.p===k));
+  document.getElementById('osIntro').textContent=OS_SCRIPTS[k].intro;
+  document.getElementById('osFeed').innerHTML='';
+  document.querySelectorAll('.os-agent').forEach(a=>a.classList.remove('active'));
+  const btn=document.getElementById('osRun'); btn.disabled=false; btn.textContent='▶ Run';
+}
+function osRun(){
+  clearInterval(osTimer);
+  const sc=OS_SCRIPTS[osPat]; const feed=document.getElementById('osFeed');
+  feed.innerHTML=''; const btn=document.getElementById('osRun'); btn.disabled=true; btn.textContent='Running…';
+  document.querySelectorAll('.os-agent').forEach(a=>a.classList.remove('active'));
+  let i=0;
+  osTimer=setInterval(()=>{
+    if(i>=sc.steps.length){ clearInterval(osTimer); btn.disabled=false; btn.textContent='↻ Run again';
+      document.querySelectorAll('.os-agent').forEach(a=>a.classList.remove('active')); return; }
+    const s=sc.steps[i]; document.querySelectorAll('.os-agent').forEach(a=>a.classList.remove('active'));
+    let html;
+    if(s.sys){ html='<div class="os-msg sys">⚙ '+s.m_||s.sys+'</div>'; }
+    else if(s.term){ html='<div class="os-msg term">🛑 '+s.term+'</div>'; }
+    else { const ag=OS_AGENTS.find(a=>a.id===s.a); document.getElementById('os-'+s.a).classList.add('active');
+      html='<div class="os-msg"><div class="who" style="color:'+ag.c+'">'+ag.av+' '+ag.n+'</div>'+s.m+'</div>'; }
+    feed.insertAdjacentHTML('beforeend',html); feed.scrollTop=feed.scrollHeight; i++;
+  },1300);
+}
+
+/* ---- L9: failure diagnostic ---- */
+const FD = [
+  {sym:'It runs forever and the bill is huge', name:'No termination condition', fix:'The loop has no reliable stop. Add composed termination: a hard cap (max messages/tokens/time) AND a completion signal (an agent calls a "done" tool) AND a human stop. In LangGraph: recursion_limit + an edge to END.', lg:'recursion_limit + END'},
+  {sym:'Results are vague and inconsistent', name:'Instructions too thin (failure #1)', fix:'Vague prompts = vague agents. Rewrite instructions as a detailed job description (role, tool-use rules, output format, error handling, "done when…"). Grow them from real eval failures. Cheapest, highest-leverage fix.', lg:'(prompt)'},
+  {sym:'It picks the wrong tool, or fumbles tools', name:'Poor / too many tools', fix:'Reliability over breadth — 10 excellent, well-documented, domain-specific tools beat 50 mediocre ones. Too many tools confuse the model and clog context. Improve docstrings; cut redundant tools.', lg:'@tool'},
+  {sym:'Quality degrades the longer it runs', name:'Context rot', fix:'The window is overloaded. Apply context engineering: summarise old history, trim bulky tool outputs, retrieve memory selectively. Feed it less, but the right less.', lg:'state trimming'},
+  {sym:'It treats risky actions as casually as safe ones', name:'No cost-aware delegation', fix:'To an agent, "delete data" and "search web" look identical. Classify actions by risk and gate high-cost ones behind human approval. In LangGraph: interrupt() before irreversible actions.', lg:'interrupt()'},
+  {sym:'We swapped models and it got worse', name:'Instructions don\'t match the model', fix:'Prompts are not portable across models (or even versions). Keep model-specific instruction sets, and A/B test with your eval suite whenever you switch.', lg:'(prompt registry)'},
+  {sym:'It repeats the same mistakes every session', name:'No memory / not learning', fix:'It\'s stateless. Add long-term memory (a Store / RAG) so it accumulates knowledge — but only if eval shows the memory overhead actually improves results. Not every agent needs it.', lg:'Store'},
+  {sym:'On long tasks it ploughs ahead down a bad path', name:'No metacognition', fix:'It can\'t judge its own progress. Use a plan-based orchestrator that evaluates each step and re-plans/retries on failure (the Lesson 7 pattern).', lg:'create_supervisor'},
+  {sym:'I can\'t tell if my changes are helping', name:'No evals (the meta-failure)', fix:'You can\'t optimise what you can\'t measure. Build even a tiny eval: 5–8 test tasks + expected outcomes + a judge. Now every change is a number, not a vibe.', lg:'LangSmith evals'},
+  {sym:'It does risky things a human should approve', name:'No human delegation', fix:'Define escalation: rule-based (any payment > $X) or LLM-based ("this mentions legal action — escalate"). Route those to a person via human-in-the-loop.', lg:'interrupt()'},
+];
+MOUNTS.failure = () => {
+  const m=document.getElementById('fdMount');
+  const syms=FD.map((f,i)=>'<button class="fd-sym" data-i="'+i+'" onclick="fdSel('+i+')">“'+f.sym+'”</button>').join('');
+  m.innerHTML='<div class="fd-grid">'+syms+'</div><div class="fd-ans" id="fdAns"></div>';
+};
+function fdSel(i){
+  const f=FD[i];
+  document.querySelectorAll('.fd-sym').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i));
+  const a=document.getElementById('fdAns'); a.className='fd-ans show';
+  a.innerHTML='<div class="fdname">'+f.name+'</div><p style="font-size:14.5px;color:var(--ink2);margin-bottom:8px">'+f.fix+'</p>'
+    +(f.lg&&f.lg[0]!=='('?'<span class="l" style="font-family:var(--mono);font-size:12.5px;color:var(--indigo-ink);background:var(--indigo-soft);padding:2px 8px;border-radius:6px">LangGraph fix → '+f.lg+'</span>':'');
+}
+
+/* fix os sys message field name */
+Object.values(OS_SCRIPTS).forEach(s=>s.steps.forEach(st=>{ if(st.sys) st.m_=st.sys; }));
+</script>
+
+<script>
+/* ============================================================ BOOT */
+buildNav();
+const initial = location.hash.slice(1);
+if(initial && (initial==='home' || LESSONS.find(l=>l.id===initial))) go(initial);
+else renderHome();
+refreshNav(current);
+function toggleNav(){ const s=document.getElementById('sidebar'),c=document.getElementById('scrim');
+  s.classList.toggle('open'); c.classList.toggle('open'); }
+function closeNav(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
+</script>
+</body>
+</html>
